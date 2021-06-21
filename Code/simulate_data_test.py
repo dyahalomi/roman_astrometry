@@ -1,10 +1,57 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import exoplanet as xo
-import pymc3 as pm
-import theano.tensor as tt
-from astropy import units as u
-from astropy.constants import M_earth, M_sun, R_sun
+#import pymc3 as pm
+#import theano.tensor as tt
+#from astropy import units as u
+from astropy.constants import M_earth
+
+
+P_earth = 365.256
+e_earth = 0.0167
+Tper_earth= 2454115.5208333
+omega_earth = np.radians(102.9)
+Omega_earth = np.radians(0.0)
+inclination_earth = np.radians(45.0)
+m_earth = 1 #units m_earth
+
+
+orbit = xo.orbits.KeplerianOrbit(
+    period = P_earth,
+    ecc = e_earth, 
+    t_periastron = Tper_earth, 
+    omega = omega_earth, 
+    Omega = Omega_earth,  
+    incl = inclination_earth,
+    m_planet = m_earth, 
+    m_planet_units = M_earth)
+
+
+times_rv = np.linspace(Tper_earth, Tper_earth+1000, 10000) 
+rv = orbit.get_radial_velocity(times_rv)
+rv_orbit = rv.eval()
+
+
+#Earth RV signal around sun should only be around 0.1 m/s, to give some flexibility here let's increase this
+#by an order of magnitude and say that the max amplitude in rv_orbit minus the min amplitude in rv_orbit
+#in units of m/s cannot excede 1 m/s
+rv_diff = np.max(rv_orbit)-np.min(rv_orbit)
+assert(rv_diff < 1.0 ), "ERROR! THIS IS NOT EARTH LIKE! max amplitude in rv_orbit minus the min amplitude in rv_orbit is greater than 1.0 m/s."
+
+
+
+fig, ax = plt.subplots(1, figsize = [18,10])
+fig.suptitle("RV Signal", fontsize = 45)
+
+
+ax.plot(times_rv, rv_orbit, color = 'k')
+
+ax.set_xlabel("time [BJD]", fontsize = 27)
+ax.set_ylabel("RV [m/s]", fontsize = 27)
+
+fig.tight_layout()
+plt.show()
+
 
 def create_orbit(n_planets, orbit_params):
     
@@ -39,6 +86,7 @@ def create_orbit(n_planets, orbit_params):
         incl.append(orbit_params[ii][5])
         m_planet.append(orbit_params[ii][6])
 
+    print("M_earth", str(M_earth))
     orbit = xo.orbits.KeplerianOrbit(
         period = period,
         ecc = ecc, 

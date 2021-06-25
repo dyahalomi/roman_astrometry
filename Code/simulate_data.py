@@ -5,6 +5,8 @@ import pymc3 as pm
 import theano.tensor as tt
 from astropy import units as u
 from astropy.constants import M_earth, M_sun, R_sun
+from aesara_theano_fallback import aesara as theano
+
 
 def create_orbit(n_planets, orbit_params):
     
@@ -167,17 +169,19 @@ def simulate_data(
 
     #-----------
     #-----------
+    
+    rho, theta = theano.function([], orbit.get_relative_angles(times_astrometry, plx))()
 
-    rho, theta = orbit.get_relative_angles(times_astrometry, plx)
+   #rho, theta = orbit.get_relative_angles(times_astrometry, plx)
 
-    rho_orbit = rho.eval()
+    rho_orbit = rho
     
     if n_planets > 1:
         rho_orbit_sum = np.sum(rho_orbit, axis = 1)
     else:
         rho_orbit_sum = rho_orbit
 
-    theta_orbit = theta.eval()
+    theta_orbit = theta
     
     if n_planets > 1:
         theta_orbit_sum = np.sum(theta_orbit, axis = 1)
@@ -185,17 +189,17 @@ def simulate_data(
         theta_orbit_sum = theta_orbit
 
 
+    rho_observed, theta_observed = theano.function([], orbit.get_relative_angles(times_observed_astrometry, plx))()
+    #rho_observed, theta_observed = orbit.get_relative_angles(times_observed_astrometry, plx)
 
-    rho_observed, theta_observed = orbit.get_relative_angles(times_observed_astrometry, plx)
-
-    rho_observed = rho_observed.eval()
+    rho_observed = rho_observed
     
     if n_planets > 1:
         rho_observed_sum = np.sum(rho_observed, axis = 1)
     else:
         rho_observed_sum = rho_observed
 
-    theta_observed = theta_observed.eval()
+    theta_observed = theta_observed
     
     if n_planets > 1:
         theta_observed_sum = np.sum(theta_observed, axis = 1)

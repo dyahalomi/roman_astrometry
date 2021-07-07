@@ -172,7 +172,6 @@ def simulate_data(
     
     rho, theta = theano.function([], orbit.get_relative_angles(times_astrometry, plx))()
 
-   #rho, theta = orbit.get_relative_angles(times_astrometry, plx)
 
     rho_orbit = rho
     
@@ -187,10 +186,19 @@ def simulate_data(
         theta_orbit_sum = np.sum(theta_orbit, axis = 1)
     else:
         theta_orbit_sum = theta_orbit
+        
+        
+    # when summing over theta, position angle, we have to careful because position
+    # angle has the range -pi to pi. So for only summing 2 thetas, we can subtract 
+    # 2pi whenever theta_sum > pi and add 2pi whenever theta_sum < -pi to get back
+    # in the correct range. Be careful though if modeling more than 2 planets, this
+    # doesn't completely solve the problem!
+    theta_orbit_sum[theta_orbit_sum >  np.pi] -= 2*np.pi
+    theta_orbit_sum[theta_orbit_sum < -np.pi] += 2*np.pi
+
 
 
     rho_observed, theta_observed = theano.function([], orbit.get_relative_angles(times_observed_astrometry, plx))()
-    #rho_observed, theta_observed = orbit.get_relative_angles(times_observed_astrometry, plx)
 
     rho_observed = rho_observed
     
@@ -205,6 +213,8 @@ def simulate_data(
         theta_observed_sum = np.sum(theta_observed, axis = 1)
     else:
         theta_observed_sum = theta_observed
+        
+    
 
 
     #----------- 
@@ -239,9 +249,18 @@ def simulate_data(
     if n_planets > 1:
         theta_sim = theta_observed + np.random.normal(0, sigma_theta, (len(theta_observed), n_planets)) 
         theta_sim_sum = np.sum(theta_sim, axis = 1)
+        
     else:
         theta_sim = theta_observed + np.random.normal(0, sigma_theta, len(theta_observed))
         theta_sim_sum = theta_sim
+        
+    # when summing over theta, position angle, we have to careful because position
+    # angle has the range -pi to pi. So for only summing 2 thetas, we can subtract 
+    # 2pi whenever theta_sum > pi and add 2pi whenever theta_sum < -pi to get back
+    # in the correct range. Be careful though if modeling more than 2 planets, this
+    # doesn't completely solve the problem!
+    theta_sim_sum[theta_sim_sum >  np.pi] -= 2*np.pi
+    theta_sim_sum[theta_sim_sum < -np.pi] += 2*np.pi
     
     
     times = [times_rv, times_observed_rv, times_astrometry, times_observed_astrometry]
@@ -322,41 +341,47 @@ def plot_astrometry_signal(
     
     if n_planets > 1:
         for ii in range(0, n_planets):
-            ax0.plot(times_astrometry, theta_orbit.T[ii], color = 'k')
-            ax0.plot(times_observed_astrometry, theta_sim.T[ii], 'o', color = colors[ii], label = planet_names[ii], alpha = 0.3)
+            ax0.plot(times_astrometry, rho_orbit.T[ii], color = 'k')
+            ax0.plot(times_observed_astrometry, rho_sim.T[ii], 'o', color = colors[ii], label = planet_names[ii], alpha = 0.3)
     else:
-        ax0.plot(times_astrometry, theta_orbit, color = 'k')
-        ax0.plot(times_observed_astrometry, theta_sim, 'o',  color = colors[0], label = planet_names[0], alpha = 0.3)
-
+        ax0.plot(times_astrometry, rho_orbit, color = 'k')
+        ax0.plot(times_observed_astrometry, rho_sim, 'o', color = colors[0], label = planet_names[0], alpha = 0.3)
     
-    ax0.set_ylabel(r"$\theta$ [rad E of N]", fontsize = 27)
+    ax0.set_ylabel("separation ['']", fontsize = 27)
+    ax0.set_xlabel("time [BJD]", fontsize = 27)
+    for tick in ax0.get_xticklabels():
+        tick.set_rotation(30)
     ax0.legend(fontsize = 27, loc = 2)
-
+    
+    
     
     if n_planets > 1:
         for ii in range(0, n_planets):
-            ax1.plot(times_astrometry, rho_orbit.T[ii], color = 'k')
-            ax1.plot(times_observed_astrometry, rho_sim.T[ii], 'o', color = colors[ii], label = planet_names[ii], alpha = 0.3)
+            ax1.plot(times_astrometry, theta_orbit.T[ii], color = 'k')
+            ax1.plot(times_observed_astrometry, theta_sim.T[ii], 'o', color = colors[ii], label = planet_names[ii], alpha = 0.3)
     else:
-        ax1.plot(times_astrometry, rho_orbit, color = 'k')
-        ax1.plot(times_observed_astrometry, rho_sim, 'o', color = colors[0], label = planet_names[0], alpha = 0.3)
+        ax1.plot(times_astrometry, theta_orbit, color = 'k')
+        ax1.plot(times_observed_astrometry, theta_sim, 'o',  color = colors[0], label = planet_names[0], alpha = 0.3)
+
     
-    ax1.set_ylabel("separation ['']", fontsize = 27)
-    ax1.set_xlabel("time [BJD]", fontsize = 27)
-    for tick in ax1.get_xticklabels():
-        tick.set_rotation(30)
+    ax1.set_ylabel(r"$\theta$ [rad E of N]", fontsize = 27)
     ax1.legend(fontsize = 27, loc = 2)
 
-    ax2.plot(times_astrometry, theta_orbit_sum, color = 'k')
-    ax2.plot(times_observed_astrometry, theta_sim_sum, 'o', color = colors[n_planets], label = 'combined signal', alpha = 0.3)
-    ax2.legend(fontsize = 27, loc = 2)
+    
 
-    ax3.plot(times_astrometry, rho_orbit_sum, color = 'k')
-    ax3.plot(times_observed_astrometry, rho_sim_sum, 'o', color = colors[n_planets], label = 'combined signal', alpha = 0.3)
-    ax3.set_xlabel("time [BJD]", fontsize = 27)
+
+    
+    ax2.plot(times_astrometry, rho_orbit_sum, color = 'k')
+    ax2.plot(times_observed_astrometry, rho_sim_sum, 'o', color = colors[n_planets], label = 'combined signal', alpha = 0.3)
+    ax2.set_xlabel("time [BJD]", fontsize = 27)
     for tick in ax3.get_xticklabels():
         tick.set_rotation(30)
+    ax2.legend(fontsize = 27, loc = 2)
+    
+    ax3.plot(times_astrometry, theta_orbit_sum, color = 'k')
+    ax3.plot(times_observed_astrometry, theta_sim_sum, 'o', color = colors[n_planets], label = 'combined signal', alpha = 0.3)
     ax3.legend(fontsize = 27, loc = 2)
+
 
     fig.tight_layout()
     fig.show()

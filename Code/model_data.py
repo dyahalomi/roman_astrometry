@@ -15,81 +15,77 @@ matplotlib.rc('ytick', labelsize=18)
 
 def model_rv(periods, Ks, x_rv, y_rv, y_rv_err):
 
-	# make a fine grid that spans the observation window for plotting purposes
-	t_rv = np.linspace(x_rv.min() - 5, x_rv.max() + 5, 1000)	
-
-
-
 	with pm.Model() as model:
-			
-			##  wide uniform prior on t_periastron
-			tperi = pm.Uniform("tperi", lower=0, upper=5000, shape=2)
-			
-			#log normal prior on period around estimates
+	
+		##  wide uniform prior on t_periastron
+		tperi = pm.Uniform("tperi", lower=0, upper=5000, shape=2)
+		
+		#log normal prior on period around estimates
 
-			logP = pm.Uniform(
-				"logP",
-				lower=0,
-				upper=9,
-				shape=2,
-				testval=np.log(periods),
-			)
-			
-
-
-			P = pm.Deterministic("P", tt.exp(logP))
-			
-			
-			# Wide normal prior for semi-amplitude
-			logK = pm.Uniform("logK", lower=-4, upper=3, shape=2, testval=np.log(Ks))
-			
-			K = pm.Deterministic("K", tt.exp(logK))
-			
-			
-			# Eccentricity & argument of periasteron
-			ecs = pmx.UnitDisk("ecs", shape=(2, 2), testval=0.01 * np.ones((2, 2)))
-			ecc = pm.Deterministic("ecc", tt.sum(ecs ** 2, axis=0))
-			omega = pm.Deterministic("omega", tt.arctan2(ecs[1], ecs[0]))
-			#xo.eccentricity.vaneylen19(
-			#	"ecc_prior", multi=True, shape=2, fixed=True, observed=ecc
-			#)
-			
-			# Jitter & a quadratic RV trend
-			logs = pm.Normal("logs", mu=np.log(np.median(y_rv_err)), sd=0.01)
-
-			# Then we define the orbit
-			orbit = xo.orbits.KeplerianOrbit(period=P, t_periastron=tperi, ecc=ecc, omega=omega)
-
-			# And a function for computing the full RV model
-			def get_rv_model(t, name=""):
-				# First the RVs induced by the planets
-				vrad = orbit.get_radial_velocity(t, K=K)
-				pm.Deterministic("vrad" + name, vrad)
-
-				# Sum over planets and add the background to get the full model
-				return pm.Deterministic("rv_model" + name, tt.sum(vrad, axis=-1))
-
-			# Define the RVs at the observed times
-			rv_model = get_rv_model(x_rv)
-
-			# Also define the model on a fine grid as computed above (for plotting)
-			rv_model_pred = get_rv_model(t_rv, name="_pred")
-
-			# Finally add in the observation model. This next line adds a new contribution
-			# to the log probability of the PyMC3 model
-			err = tt.sqrt(y_rv_err ** 2 + tt.exp(2 * logs))
-			pm.Normal("obs", mu=rv_model, sd=err, observed=y_rv)
+		logP = pm.Uniform(
+			"logP",
+			lower=0,
+			upper=9,
+			shape=2,
+			testval=np.log(periods),
+		)
+		
 
 
-			map_soln = model.test_point
-			map_soln = pmx.optimize(start=map_soln, vars=[ecs, K])
-			map_soln = pmx.optimize(start=map_soln, vars=[tperi, ecs, K])
-			map_soln = pmx.optimize(start=map_soln)
+		P = pm.Deterministic("P", tt.exp(logP))
+		
+		
+		# Wide normal prior for semi-amplitude
+		logK = pm.Uniform("logK", lower=-4, upper=3, shape=2, testval=np.log(Ks))
+		
+		K = pm.Deterministic("K", tt.exp(logK))
+		
+		
+		# Eccentricity & argument of periasteron
+		ecs = pmx.UnitDisk("ecs", shape=(2, 2), testval=0.01 * np.ones((2, 2)))
+		ecc = pm.Deterministic("ecc", tt.sum(ecs ** 2, axis=0))
+		omega = pm.Deterministic("omega", tt.arctan2(ecs[1], ecs[0]))
+		#xo.eccentricity.vaneylen19(
+		#	"ecc_prior", multi=True, shape=2, fixed=True, observed=ecc
+		#)
+		
+		# Jitter & a quadratic RV trend
+		logs = pm.Normal("logs", mu=np.log(np.median(y_rv_err)), sd=0.01)
 
+		# Then we define the orbit
+		orbit = xo.orbits.KeplerianOrbit(period=P, t_periastron=tperi, ecc=ecc, omega=omega)
+
+		# And a function for computing the full RV model
+		def get_rv_model(t, name=""):
+			# First the RVs induced by the planets
+			vrad = orbit.get_radial_velocity(t, K=K)
+			pm.Deterministic("vrad" + name, vrad)
+
+			# Sum over planets and add the background to get the full model
+			return pm.Deterministic("rv_model" + name, tt.sum(vrad, axis=-1))
+
+		# Define the RVs at the observed times
+		rv_model = get_rv_model(x_rv)
+
+		# Also define the model on a fine grid as computed above (for plotting)
+		rv_model_pred = get_rv_model(t_rv, name="_pred")
+
+		# Finally add in the observation model. This next line adds a new contribution
+		# to the log probability of the PyMC3 model
+		err = tt.sqrt(y_rv_err ** 2 + tt.exp(2 * logs))
+		pm.Normal("obs", mu=rv_model, sd=err, observed=y_rv)
+
+
+		map_soln = model.test_point
+		map_soln = pmx.optimize(start=map_soln, vars=[ecs, K])
+		map_soln = pmx.optimize(start=map_soln, vars=[tperi, ecs, K])
+		map_soln = pmx.optimize(start=map_soln)
 
 
 	#return the max a-posteriori solution
 	return map_soln
+
+
 
 def a_from_Kepler3(period, M_tot):
 	period = period*86400 #days to seconds
@@ -133,13 +129,6 @@ def determine_phase(P, t_periastron):
 
 
 def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, rho, rho_err, theta, theta_err):
-	# make a fine grid that spans the observation window for plotting purposes
-	t_astrometry = np.linspace(x_astrometry.min() - 5, x_astrometry.max() + 5, 1000)
-	t_rv = np.linspace(x_rv.min() - 5, x_rv.max() + 5, 1000)	
-
-	# for predicted orbits
-	t_fine = np.linspace(x_astrometry.min() - 500, x_astrometry.max() + 500, num=1000)
-
 
 	P_RV = np.array(rv_map_soln['P'])
 	K_RV = np.array(rv_map_soln['K'])
@@ -148,6 +137,14 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, rho, rho_err, th
 	omega_RV = np.array(rv_map_soln['omega'])
 	min_masses_RV = min_mass(K_RV, P_RV, ecc_RV)
 	phase_RV = determine_phase(P_RV, tperi_RV)
+
+
+
+	print(P_RV)
+	print(K_RV)
+	print(tperi_RV)
+	print(ecc_RV)
+	print(omega_RV)
 
 
 
@@ -458,13 +455,47 @@ rho_data = rho_sim_sum
 rho_err = np.full(np.shape(rho_data), sigma_rho)
 
 
+# make a fine grid that spans the observation window for plotting purposes
+t_astrometry = np.linspace(x_astrometry.min() - 5, x_astrometry.max() + 5, 1000)
+t_rv = np.linspace(x_rv.min() - 5, x_rv.max() + 5, 1000)	
+
+# for predicted orbits
+t_fine = np.linspace(x_astrometry.min() - 500, x_astrometry.max() + 500, num=1000)
+
+
+
 
 periods_guess = [360, 4330]
 Ks_guess = xo.estimate_semi_amplitude(periods_guess, x_rv, y_rv, y_rv_err)
 
 
-
+print("finding RV model solutions")
 rv_map_soln = model_rv(periods_guess, Ks_guess, x_rv, y_rv, y_rv_err)
+
+fig, ax = plt.subplots(1,2, figsize = [15,10])
+
+ax[0].errorbar(x_rv, y_rv, yerr=y_rv_err, fmt=".k", alpha = 0.05, label='data', zorder=1)
+ax[0].plot(t_rv, rv_map_soln["rv_model_pred"], "b", label="combined model", zorder=2)
+ax[0].plot(t_rv, rv_map_soln["vrad_pred"], "--k", alpha=0.5, label="individual models")
+
+
+ax[0].legend(fontsize=10)
+ax[0].set_xlim(t_rv.min(), t_rv.max())
+ax[0].set_xlabel("time [days]")
+ax[0].set_ylabel("radial velocity [m/s]")
+ax[0].set_title("MAP model and data")
+
+
+ax[1].plot(t_rv, rv_map_soln["vrad_pred"], "--k", alpha=0.5, label="individual models")
+ax[1].legend(fontsize=10)
+ax[1].set_xlim(t_rv.min(), t_rv.max())
+ax[1].set_xlabel("time [days]")
+ax[1].set_ylabel("radial velocity [m/s]")
+ax[1].set_title("MAP model only")
+plt.show()
+
+
+print("finding joint model solutions")
 model, map_soln = model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, rho_data, rho_err, theta_data, theta_err)
 
 
@@ -474,9 +505,80 @@ model, map_soln = model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, rh
 
 
 
+ekw = dict(fmt=".k", lw=0.5)
+
+fig, ax = plt.subplots(nrows=4, sharex=True, figsize=(6, 8))
+ax[0].set_ylabel(r'$\rho\,$ ["]')
+ax[1].set_ylabel(r"$\rho$ residuals")
+ax[2].set_ylabel(r"P.A. [radians]")
+ax[3].set_ylabel(r"P.A. residuals")
+
+tot_rho_err = np.sqrt(rho_err ** 2 + np.exp(2 * map_soln["log_rho_s"]))
+tot_theta_err = np.sqrt(theta_err ** 2 + np.exp(2 * map_soln["log_theta_s"]))
+
+ax[0].errorbar(x_astrometry, rho_data, yerr=tot_rho_err, **ekw)
+ax[0].plot(t_fine, map_soln["rho_model_pred"], color="#773f6a")
+
+ax[1].axhline(0.0, color="0.5")
+ax[1].errorbar(
+	x_astrometry, rho_data - map_soln["rho_model"], yerr=tot_rho_err, **ekw
+)
+
+
+ax[2].plot(t_fine, map_soln["theta_model_pred"], color="#773f6a")
+ax[2].errorbar(x_astrometry, theta_data, yerr=tot_theta_err, **ekw)
+
+ax[3].axhline(0.0, color="0.5")
+ax[3].errorbar(
+	x_astrometry, theta_data - map_soln["theta_model"], yerr=tot_theta_err, **ekw
+)
+
+ax[3].set_xlim(t_fine[0], t_fine[-1])
+_ = ax[0].set_title("map orbit")
+
+plt.show()
+
+################################################
+################################################
+################################################
+################################################
+
+
+
+fig, ax = plt.subplots(1, figsize = [9,9])
+
+xs = map_soln["rho_model_pred"] * np.cos(map_soln["theta_model_pred"])  # X is north
+ys = map_soln["rho_model_pred"] * np.sin(map_soln["theta_model_pred"])  # Y is east
+ax.plot(ys, xs, color="#773f6a", lw=1, label = "RV + astrometry model")
+
+
+# plot the data
+xs = rho_data * np.cos(theta_data)  # X is north
+ys = rho_data * np.sin(theta_data)  # Y is east
+ax.plot(ys, xs, ".k", label = "data")
+
+ax.set_ylabel(r"$\Delta \delta$ ['']")
+ax.set_xlabel(r"$\Delta \alpha \cos \delta$ ['']")
+ax.invert_xaxis()
+ax.plot(0, 0, "k*")
+ax.set_aspect("equal", "datalim")
+ax.set_title("initial orbit")
+ax.legend()
+plt.show()
+
+
+################################################
+################################################
+################################################
+################################################
 
 
 
 
-
+plt.figure(figsize=[15,10])
+plt.plot(t_rv, map_soln["rv_model_pred"],color="#773f6a", lw=3)
+plt.plot(x_rv, y_rv, color='k', alpha=0.3)
+plt.xlabel("time [days]")
+plt.ylabel("RV [m/s]")
+plt.show()
 

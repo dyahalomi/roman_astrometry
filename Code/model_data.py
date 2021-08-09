@@ -116,7 +116,10 @@ def semi_amplitude(m_planet, a, ecc, inclination):
 
 
 def min_mass(K, period, ecc):
-	m_planet = K/((333030*m_jup)*28.4329/(np.sqrt(1-ecc**2.)) \
+	m_jup = 317.83*3.00273e-6 #units m_sun
+	m_sun = 333030 #earth masses
+
+	m_planet = K/((m_sun*m_jup)*28.4329/(np.sqrt(1-ecc**2.)) \
 		*(m_sun)**(-2/3) * (period / 365.256) ** (-1/3))
 
 	return m_planet/m_sun

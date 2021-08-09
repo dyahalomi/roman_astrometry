@@ -143,6 +143,14 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, rho, rho_err, th
 	omega_RV = np.array(rv_map_soln['omega'])
 	min_masses_RV = min_mass(K_RV, P_RV, ecc_RV)
 	phase_RV = determine_phase(P_RV, tperi_RV)
+    
+    
+	# make a fine grid that spans the observation window for plotting purposes
+	t_astrometry = np.linspace(x_astrometry.min() - 5, x_astrometry.max() + 5, 1000)
+	t_rv = np.linspace(x_rv.min() - 5, x_rv.max() + 5, 1000)
+
+	# for predicted orbits
+	t_fine = np.linspace(x_astrometry.min() - 500, x_astrometry.max() + 500, num=1000)
 
 
 

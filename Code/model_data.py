@@ -133,7 +133,8 @@ def determine_phase(P, t_periastron):
 
 
 def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, rho, rho_err, theta, theta_err, parallax):
-
+	m_sun = 333030 #earth masses
+    
 	P_RV = np.array(rv_map_soln['P'])
 	K_RV = np.array(rv_map_soln['K'])
 	tperi_RV = np.array(rv_map_soln['tperi'])

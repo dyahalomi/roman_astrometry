@@ -14,6 +14,7 @@ matplotlib.rc('ytick', labelsize=18)
 
 
 def model_rv(periods, Ks, x_rv, y_rv, y_rv_err):
+	t_rv = np.linspace(x_rv.min() - 5, x_rv.max() + 5, 1000)
 
 	with pm.Model() as model:
 	

@@ -107,6 +107,8 @@ def a_from_Kepler3(period, M_tot):
 
 
 def semi_amplitude(m_planet, a, ecc, inclination):
+	from astropy.constants import G
+
 	K = \
 	np.sqrt(G / (1-(ecc**2.))) * ((m_planet*M_sun)*np.sin(inclination)) * \
 	((M_sun+(m_planet*M_sun))** (-(1./2.))) * \
@@ -183,12 +185,12 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 	a_jup = a_from_Kepler3(P_jup, 1.0+m_jup)
 
 	print('')
-	print([P_earth, P_jup])
-	print([semi_amplitude(m_earth, a_earth, e_earth, inclination_earth),
-           semi_amplitude(m_jup, a_jup, e_jup, inclination_jup)])
-	print([Tper_earth, Tper_jup])
-	print([e_earth, e_jup])
-	print([omega_earth, omega_jup])
+	P_RV = [P_earth, P_jup]
+	K_RV = [semi_amplitude(m_earth, a_earth, e_earth, inclination_earth),
+           semi_amplitude(m_jup, a_jup, e_jup, inclination_jup)]
+	tperi_RV = [Tper_earth, Tper_jup]
+	ecc_RV = [e_earth, e_jup]
+	omega_RV = [omega_earth, omega_jup]
 
 
 
@@ -380,8 +382,7 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 
 			# Optimize to find the initial parameters
 			map_soln = model.test_point
-			map_soln = pmx.optimize(map_soln, vars=[sqrtm_cosi, sqrtm_sini])
-			map_soln = pmx.optimize(map_soln, vars=[phase])
+			map_soln = pmx.optimize(map_soln, vars=[sqrtm_cosi, sqrtm_sini, Omega])
 			map_soln = pmx.optimize(map_soln, vars=[Omega, ecs])
 			map_soln = pmx.optimize(map_soln, vars=[P, a, phase])
 			map_soln = pmx.optimize(map_soln)

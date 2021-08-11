@@ -107,6 +107,8 @@ def a_from_Kepler3(period, M_tot):
 
 
 def semi_amplitude(m_planet, a, ecc, inclination):
+	from astropy.constants import G
+
 	K = \
 	np.sqrt(G / (1-(ecc**2.))) * ((m_planet*M_sun)*np.sin(inclination)) * \
 	((M_sun+(m_planet*M_sun))** (-(1./2.))) * \
@@ -160,6 +162,36 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 	print(ecc_RV)
 	print(omega_RV)
 
+	T_subtract = 2454000
+
+	P_earth = 365.256
+	e_earth = 0.0167
+	Tper_earth= 2454115.5208333 - T_subtract
+	omega_earth = np.radians(102.9)
+	Omega_earth = np.radians(0.0)
+	inclination_earth = np.radians(45.0)
+	m_earth = 1*3.00273e-6 #units m_sun
+	a_earth = a_from_Kepler3(P_earth, 1.0+m_earth)
+
+
+
+	P_jup = 4327.631
+	e_jup = 0.0484
+	Tper_jup = 2455633.7215278 - T_subtract
+	omega_jup = np.radians(274.3) - 2*np.pi
+	Omega_jup = np.radians(100.4)
+	inclination_jup = np.radians(1.31) + inclination_earth
+	m_jup = 317.83*3.00273e-6 #units m_sun
+	a_jup = a_from_Kepler3(P_jup, 1.0+m_jup)
+
+	print('')
+	P_RV = [P_earth, P_jup]
+	K_RV = [semi_amplitude(m_earth, a_earth, e_earth, inclination_earth),
+           semi_amplitude(m_jup, a_jup, e_jup, inclination_jup)]
+	tperi_RV = [Tper_earth, Tper_jup]
+	ecc_RV = [e_earth, e_jup]
+	omega_RV = [omega_earth, omega_jup]
+
 
 
 	# for predicted orbits
@@ -188,8 +220,8 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 			
 			# Eccentricity & argument of periasteron
 			ecs = pmx.UnitDisk("ecs", shape=(2, 2), 
-							   testval=np.array([ecc_RV*np.cos(omega_RV), 
-												 ecc_RV*np.sin(omega_RV)]))
+							   testval=np.array([np.sqrt(ecc_RV)*np.cos(omega_RV), 
+												 np.sqrt(ecc_RV)*np.sin(omega_RV)]))
 			ecc = pm.Deterministic("ecc", tt.sum(ecs ** 2, axis=0))
 			omega = pm.Deterministic("omega", tt.arctan2(ecs[1], ecs[0]))
 			
@@ -226,17 +258,17 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 
 			# uniform prior on sqrtm_sini and sqrtm_cosi
 			sqrtm_sini_1 = pm.Uniform("sqrtm_sini_1", lower=0, upper=500, 
-									testval = min_masses_RV[0]*m_sun, shape=1)
+									testval = np.sqrt(m_earth)*np.sin(inclination_earth), shape=1)
 			
 			sqrtm_cosi_1 = pm.Uniform("sqrtm_cosi_1", lower=0, upper=500, 
-									testval = min_masses_RV[0]*m_sun, shape=1)
+									testval = np.sqrt(m_earth)*np.cos(inclination_earth), shape=1)
 
 			# uniform prior on sqrtm_sini and sqrtm_cosi
 			sqrtm_sini_2 = pm.Uniform("sqrtm_sini_2", lower=0, upper=500, 
-									testval = min_masses_RV[1]*m_sun, shape=1)
+									testval = np.sqrt(m_jup)*np.sin(inclination_earth), shape=1)
 			
 			sqrtm_cosi_2 = pm.Uniform("sqrtm_cosi_2", lower=0, upper=500, 
-									testval = min_masses_RV[1]*m_sun, shape=1)
+									testval = np.sqrt(m_jup)*np.cos(inclination_earth), shape=1)
 
 
 			sqrtm_sini = tt.concatenate([sqrtm_sini_1, sqrtm_sini_2])

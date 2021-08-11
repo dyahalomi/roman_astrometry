@@ -160,6 +160,7 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 	print(ecc_RV)
 	print(omega_RV)
 
+	T_subtract = 2454000
 
 	P_earth = 365.256
 	e_earth = 0.0167
@@ -168,6 +169,7 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 	Omega_earth = np.radians(0.0)
 	inclination_earth = np.radians(45.0)
 	m_earth = 1*3.00273e-6 #units m_sun
+	a_earth = a_from_Kepler3(P_earth, 1.0+m_earth)
 
 
 
@@ -178,6 +180,7 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 	Omega_jup = np.radians(100.4)
 	inclination_jup = np.radians(1.31) + inclination_earth
 	m_jup = 317.83*3.00273e-6 #units m_sun
+	a_jup = a_from_Kepler3(P_jup, 1.0+m_jup)
 
 	print('')
 	print([P_earth, P_jup])

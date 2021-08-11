@@ -270,8 +270,8 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 				pm.Deterministic("ra" + name, ra)
 				
 				# Sum over planets to get the full model
-				dec_model = pm.Deterministic("dec_model" + name, tt.sum(ra, axis=-1))
-				ra_model = pm.Deterministic("ra_model" + name, tt.sum(dec, axis=-1))
+				dec_model = pm.Deterministic("dec_model" + name, tt.sum(dec, axis=-1))
+				ra_model = pm.Deterministic("ra_model" + name, tt.sum(ra, axis=-1))
 				
 
 				

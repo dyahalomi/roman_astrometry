@@ -245,8 +245,11 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 			sqrtm_sini = pm.Deterministic("sqrtm_sini", sqrtm_sini)
 			sqrtm_cosi = pm.Deterministic("sqrtm_cosi", sqrtm_cosi)
 			
-			m_planet_1 = pm.Bound(pm.Deterministic, lower=0., upper=10.)("m_planet_1", sqrtm_sini_1**2. + sqrtm_cosi_1**2.)
-			m_planet_2 = pm.Bound(pm.Deterministic, lower=10., upper=np.inf)("m_planet_2", sqrtm_sini_2**2. + sqrtm_cosi_2**2.)
+			m_planet_1 = pm.Deterministic("m_planet_1", sqrtm_sini_1**2. + sqrtm_cosi_1**2.)
+			m_planet_2 = pm.Deterministic("m_planet_2", sqrtm_sini_2**2. + sqrtm_cosi_2**2.)
+
+			m_planet_1 = pm.Potential("m_planet_1", m_planet_1, pm.Uniform("m_planet_1", upper=10.))
+			m_planet_2 = pm.Potential("m_planet_2", m_planet_1, pm.Uniform("m_planet_2", lower=10.))
 			
 			m_planet = pm.Deterministic("m_planet", np.array([m_planet_1, m_planet_2]))
 			m_planet_fit = pm.Deterministic("m_planet_fit", m_planet/m_sun)

@@ -230,7 +230,10 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 									testval = min_masses_RV[0]*m_sun, shape=2)
 			
 			
-			m_planet = pm.Deterministic("m_planet", sqrtm_sini**2. + sqrtm_cosi**2.)
+			m_planet1 = pm.Bound(pm.Deterministic, upper=10.)("m_planet1", sqrtm_sini[0]**2. + sqrtm_cosi[0]**2.)
+			m_planet2 = pm.Bound(pm.Deterministic, lower=10.)("m_planet2", sqrtm_sini[1]**2. + sqrtm_cosi[1]**2.)
+			
+			m_planet = pm.Deterministic("m_planet", [m_planet1, m_planet2])
 			m_planet_fit = pm.Deterministic("m_planet_fit", m_planet/m_sun)
 			
 			incl = pm.Deterministic("incl", tt.arctan2(sqrtm_sini, sqrtm_cosi))

@@ -222,6 +222,8 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 			phase = pmx.Angle("phase", testval=phase_RV, shape=2)
 			tperi = pm.Deterministic("tperi", P * phase / (2 * np.pi))
 			
+			
+
 			# uniform prior on sqrtm_sini and sqrtm_cosi
 			sqrtm_sini_1 = pm.Uniform("sqrtm_sini_1", lower=0, upper=500, 
 									testval = min_masses_RV[0]*m_sun, shape=1)
@@ -237,8 +239,11 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 									testval = min_masses_RV[1]*m_sun, shape=1)
 
 
-			sqrtm_sini = pm.Deterministic("sqrtm_sini", np.array([sqrtm_sini_1, sqrtm_sini_2]))
-			sqrtm_cosi = pm.Deterministic("sqrtm_cosi", np.array([sqrtm_cosi_1, sqrtm_cosi_2]))
+			sqrtm_sini = tt.concatenate([sqrtm_sini_1, sqrtm_sini_2])
+			sqrtm_cosi = tt.concatenate([sqrtm_cosi_1, sqrtm_cosi_2])
+
+			sqrtm_sini = pm.Deterministic("sqrtm_sini", sqrtm_sini)
+			sqrtm_cosi = pm.Deterministic("sqrtm_cosi", sqrtm_cosi)
 			
 			m_planet_1 = pm.Bound(pm.Deterministic, lower=0., upper=10.)("m_planet_1", sqrtm_sini_1**2. + sqrtm_cosi_1**2.)
 			m_planet_2 = pm.Bound(pm.Deterministic, lower=10., upper=np.inf)("m_planet_2", sqrtm_sini_2**2. + sqrtm_cosi_2**2.)

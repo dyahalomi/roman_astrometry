@@ -220,6 +220,9 @@ def simulate_data(
     ra_orbit = rho_orbit * np.sin(theta_orbit) # +ra is east
     dec_orbit = rho_orbit * np.cos(theta_orbit)  # +dec is north
 
+    ra_orbit_sum = rho_orbit_sum * np.sin(theta_orbit_sum) # +ra is east
+    dec_orbit_sum = rho_orbit_sum * np.cos(theta_orbit_sum)  # +dec is north
+
     ra_observed = rho_observed * np.sin(theta_observed) # +ra is east
     dec_observed = rho_observed * np.cos(theta_observed)  # +dec is north
 

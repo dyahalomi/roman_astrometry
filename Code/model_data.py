@@ -161,6 +161,33 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 	print(omega_RV)
 
 
+	P_earth = 365.256
+	e_earth = 0.0167
+	Tper_earth= 2454115.5208333 - T_subtract
+	omega_earth = np.radians(102.9)
+	Omega_earth = np.radians(0.0)
+	inclination_earth = np.radians(45.0)
+	m_earth = 1*3.00273e-6 #units m_sun
+
+
+
+	P_jup = 4327.631
+	e_jup = 0.0484
+	Tper_jup = 2455633.7215278 - T_subtract
+	omega_jup = np.radians(274.3) - 2*np.pi
+	Omega_jup = np.radians(100.4)
+	inclination_jup = np.radians(1.31) + inclination_earth
+	m_jup = 317.83*3.00273e-6 #units m_sun
+
+	print('')
+	print([P_earth, P_jup])
+	print([semi_amplitude(m_earth, a_earth, e_earth, inclination_earth),
+           semi_amplitude(m_jup, a_jup, e_jup, inclination_jup)])
+	print([Tper_earth, Tper_jup])
+	print([e_earth, e_jup])
+	print([omega_earth, omega_jup])
+
+
 
 	# for predicted orbits
 	t_fine = np.linspace(x_astrometry.min() - 500, x_astrometry.max() + 500, num=1000)

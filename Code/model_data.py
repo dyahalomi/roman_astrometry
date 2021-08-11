@@ -160,6 +160,9 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, rho_data, rho_er
 	print(ecc_RV)
 	print(omega_RV)
 
+	dec_data = rho_data * np.cos(theta_data)  # +dec is north
+	ra_data = rho_data * np.sin(theta_data) # +ra is east
+
 
 
 
@@ -513,7 +516,7 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, rho_data, rho_er
 			rv_model = get_rv_model(x_rv)
 
 			# Also define the model on a fine grid as computed above (for plotting)
-			rv_model_pred = get_rv_model(t, name="_pred")
+			rv_model_pred = get_rv_model(t_rv, name="_pred")
 
 			# Finally add in the observation model. This next line adds a new contribution
 			# to the log probability of the PyMC3 model

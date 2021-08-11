@@ -224,13 +224,13 @@ def simulate_data(
     dec_orbit = rho_orbit * np.cos(theta_orbit)  # +dec is north
 
     if n_planets > 1:
-        ra_orbit_sum = np.sum(ra_orbit, axis = 1)
+        ra_orbit_sum = rho_orbit_sum* np.sin(theta_orbit_sum)
     else:
         ra_orbit_sum = ra_orbit
 
     
     if n_planets > 1:
-        dec_orbit_sum = np.sum(dec_orbit, axis = 1)
+        dec_orbit_sum = rho_orbit_sum* np.cos(theta_orbit_sum)
     else:
         dec_orbit_sum = dec_orbit
 
@@ -260,22 +260,25 @@ def simulate_data(
 
 
     if n_planets > 1:
+        rho_sim_sum = np.sum(rho_observed, axis = 1)
+        theta_sim_sum = np.sum(theta_observed, axis = 1)
+        
+        ra_sim_sum = rho_sim_sum*np.sin(theta_sim_sum)
+        dec_sim_sum = rho_sim_sum*np.cos(theta_sim_sum)
+
         ra_sim = ra_observed + np.random.normal(0, sigma_ra, (len(ra_observed), n_planets))
-        ra_sim_sum = np.sum(ra_sim, axis = 1)
+        dec_sim = dec_observed + np.random.normal(0, sigma_dec, (len(dec_observed), n_planets))
     
     else:
         ra_sim = ra_observed + np.random.normal(0, sigma_ra, len(ra_observed))
+        dec_sim = dec_observed + np.random.normal(0, sigma_dec, len(dec_observed))
+
         ra_sim_sum = ra_sim
+        dec_sim_sum = dec_sim
       
     
-    
-    if n_planets > 1:
-        dec_sim = dec_observed + np.random.normal(0, sigma_dec, (len(dec_observed), n_planets)) 
-        dec_sim_sum = np.sum(dec_sim, axis = 1)
+
         
-    else:
-        dec_sim = dec_observed + np.random.normal(0, sigma_dec, len(dec_observed))
-        dec_sim_sum = dec_sim
 
     
     times = [times_rv, times_observed_rv, times_astrometry, times_observed_astrometry]

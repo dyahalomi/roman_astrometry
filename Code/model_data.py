@@ -52,7 +52,7 @@ def model_rv(periods, Ks, x_rv, y_rv, y_rv_err):
 		#)
 		
 		# Jitter & a quadratic RV trend
-		logs = pm.Normal("logs", mu=np.log(np.median(y_rv_err)), sd=0.01)
+		logs = pm.Normal("logs", mu=np.log(np.median(y_rv_err)), sd=y_rv_err)
 
 		# Then we define the orbit
 		orbit = xo.orbits.KeplerianOrbit(period=P, t_periastron=tperi, ecc=ecc, omega=omega)
@@ -282,18 +282,16 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 				# First the astrometry induced by the planets
 				rhos, thetas = orbit.get_relative_angles(t, plx)
 				
-				#rho_model = pm.Deterministic("rho_model" + name, tt.sum(rhos, axis=-1))
-				#theta_model = pm.Deterministic("theta_model" + name, tt.sum(thetas, axis=-1))
+				rho_model = pm.Deterministic("rho_model" + name, tt.sum(rhos, axis=-1))
+				theta_model = pm.Deterministic("theta_model" + name, tt.sum(thetas, axis=-1))
 				
-				dec = rhos * np.cos(thetas)  # X is north
-				ra = rhos * np.sin(thetas)  # Y is east
 				
-				pm.Deterministic("dec" + name, dec)
-				pm.Deterministic("ra" + name, ra)
+				dec = pm.Deterministic("dec" + name, rhos * np.cos(thetas)) # X is north
+				ra = pm.Deterministic("ra" + name, rhos * np.sin(thetas)) # Y is east
 				
 				# Sum over planets to get the full model
-				dec_model = pm.Deterministic("dec_model" + name, tt.sum(dec, axis=-1))
-				ra_model = pm.Deterministic("ra_model" + name, tt.sum(ra, axis=-1))
+				dec_model = pm.Deterministic("dec_model" + name, rho_model * np.cos(theta_model))
+				ra_model = pm.Deterministic("ra_model" + name, rho_model * np.sin(theta_model))
 				
 
 				
@@ -310,10 +308,10 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 
 			# Add jitter terms to both separation and position angle
 			log_dec_s = pm.Normal(
-				"log_dec_s", mu=np.log(np.median(dec_err)), sd=1e-5
+				"log_dec_s", mu=np.log(np.median(dec_err)), sd=0.1
 			)
 			log_ra_s = pm.Normal(
-				"log_ra_s", mu=np.log(np.median(ra_err)), sd=1e-5
+				"log_ra_s", mu=np.log(np.median(ra_err)), sd=0.1
 			)
 			dec_tot_err = tt.sqrt(dec_err ** 2 + tt.exp(2 * log_dec_s))
 			ra_tot_err = tt.sqrt(ra_err ** 2 + tt.exp(2 * log_ra_s))
@@ -327,7 +325,7 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 			
 			# ADD RV MODEL
 			# Jitter & a quadratic RV trend
-			log_rv = pm.Normal("log_rv", mu=np.log(np.median(y_rv_err)), sd=0.01)
+			log_rv = pm.Normal("log_rv", mu=np.log(np.median(y_rv_err)), sd=y_rv_err)
 
 
 			# And a function for computing the full RV model

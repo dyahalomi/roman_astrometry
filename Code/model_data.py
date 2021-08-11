@@ -354,8 +354,8 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, rho_data, rho_er
 
 	'''
 
-	dec_err = 0.0001
-	ra_err = 0.0001
+	dec_err = 1e-5
+	ra_err = 1e-5
 	# for predicted orbits
 	t_fine = np.linspace(x_astrometry.min() - 500, x_astrometry.max() + 500, num=1000)
 
@@ -483,10 +483,10 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, rho_data, rho_er
 
 			# Add jitter terms to both separation and position angle
 			log_dec_s = pm.Normal(
-				"log_dec_s", mu=np.log(np.median(rho_err)), sd=0.0001
+				"log_dec_s", mu=np.log(np.median(rho_err)), sd=1e-5
 			)
 			log_ra_s = pm.Normal(
-				"log_ra_s", mu=np.log(np.median(theta_err)), sd=0.0001
+				"log_ra_s", mu=np.log(np.median(theta_err)), sd=1e-5
 			)
 			dec_tot_err = tt.sqrt(dec_err ** 2 + tt.exp(2 * log_dec_s))
 			ra_tot_err = tt.sqrt(ra_err ** 2 + tt.exp(2 * log_ra_s))

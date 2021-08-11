@@ -308,10 +308,10 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 
 			# Add jitter terms to both separation and position angle
 			log_dec_s = pm.Normal(
-				"log_dec_s", mu=np.log(np.median(dec_err)), sd=0.1
+				"log_dec_s", mu=np.log(np.median(dec_err)), sd=dec_err
 			)
 			log_ra_s = pm.Normal(
-				"log_ra_s", mu=np.log(np.median(ra_err)), sd=0.1
+				"log_ra_s", mu=np.log(np.median(ra_err)), sd=ra_err
 			)
 			dec_tot_err = tt.sqrt(dec_err ** 2 + tt.exp(2 * log_dec_s))
 			ra_tot_err = tt.sqrt(ra_err ** 2 + tt.exp(2 * log_ra_s))

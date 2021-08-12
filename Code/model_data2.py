@@ -270,12 +270,6 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 			sqrtm_cosi_2 = pm.Uniform("sqrtm_cosi_2", lower=0, upper=500, 
 									testval = np.sqrt(m_jup*m_sun)*np.cos(inclination_jup), shape=1)
 
-
-			sqrtm_sini = tt.concatenate([sqrtm_sini_1, sqrtm_sini_2])
-			sqrtm_cosi = tt.concatenate([sqrtm_cosi_2, sqrtm_cosi_2])
-
-			sqrtm_sini = pm.Deterministic("sqrtm_sini", sqrtm_sini)
-			sqrtm_cosi = pm.Deterministic("sqrtm_cosi", sqrtm_cosi)
 			
 			m_planet_1 = pm.Deterministic("m_planet_1", sqrtm_sini_1**2. + sqrtm_cosi_1**2.)
 			m_planet_2 = pm.Deterministic("m_planet_2", sqrtm_sini_2**2. + sqrtm_cosi_2**2.)
@@ -284,12 +278,16 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 			m_planet_1_fixed = pm.Potential("m_planet_1_fixed", tt.switch(m_planet_1 > 10., -np.inf, 0))
 			m_planet_2_fixed = pm.Potential("m_planet_2_fixed", tt.switch(m_planet_2 < 100., -np.inf, 0))
 			
-			m_planet = pm.Deterministic("m_planet", tt.concatenate([m_planet_1, m_planet_2]))
+			m_planet = pm.Deterministic("m_planet", tt.concatenate([m_planet_1_fixed, m_planet_2_fixed]))
 			m_planet_fit = pm.Deterministic("m_planet_fit", m_planet/m_sun)
 			
-			incl = pm.Deterministic("incl", tt.arctan2(sqrtm_sini, sqrtm_cosi))
 			
+
+			incl_1 = pm.Deterministic("incl_1", tt.arctan2(sqrtm_sini_1, sqrtm_cosi_1))
+			incl_2 = pm.Deterministic("incl_2", tt.arctan2(sqrtm_sini_1, sqrtm_cosi_1))
 			
+
+			incl = pm.Deterministic("incl", tt.concatenate([incl_1, incl_2]))
 			
 			# add keplers 3 law function
 			a = pm.Deterministic("a", a_from_Kepler3(P, 1.0+m_planet_fit))
@@ -382,10 +380,10 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 
 			# Optimize to find the initial parameters
 			map_soln = model.test_point
-			#map_soln = pmx.optimize(map_soln, vars=[sqrtm_cosi, sqrtm_sini])
-			#map_soln = pmx.optimize(map_soln, vars=[phase])
-			#map_soln = pmx.optimize(map_soln, vars=[Omega, ecs])
-			#map_soln = pmx.optimize(map_soln, vars=[P, a, phase])
+			map_soln = pmx.optimize(map_soln, vars=[m_planet, incl])
+			map_soln = pmx.optimize(map_soln, vars=[phase])
+			map_soln = pmx.optimize(map_soln, vars=[Omega, ecs])
+			map_soln = pmx.optimize(map_soln, vars=[P, a, phase])
 			map_soln = pmx.optimize(map_soln)
 
 

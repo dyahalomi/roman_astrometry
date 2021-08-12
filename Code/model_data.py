@@ -271,7 +271,7 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 
 
 			sqrtm_sini = tt.concatenate([sqrtm_sini_1, sqrtm_sini_2])
-			sqrtm_cosi = tt.concatenate([sqrtm_cosi_2, sqrtm_cosi_2])
+			sqrtm_cosi = tt.concatenate([sqrtm_cosi_1, sqrtm_cosi_2])
 
 			sqrtm_sini = pm.Deterministic("sqrtm_sini", sqrtm_sini)
 			sqrtm_cosi = pm.Deterministic("sqrtm_cosi", sqrtm_cosi)

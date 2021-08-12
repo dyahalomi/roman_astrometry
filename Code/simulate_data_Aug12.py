@@ -169,20 +169,41 @@ def simulate_data(
     #-----------
     #-----------
     
-    rho, theta = theano.function([], orbit.get_relative_angles(times_astrometry, plx))()
 
-
-    rho_orbit = rho
+    # determine and print the star position at desired times
+    x,y,z = theano.function([], orbit.get_star_position(times_astrometry, parallax=plx))()
     
     if n_planets > 1:
-        rho_orbit_sum = np.sum(rho_orbit, axis = 1)
+
+        # calculate rho and theta
+        rho = tt.squeeze(tt.sqrt(x ** 2 + y ** 2))  # arcsec
+        theta = tt.squeeze(tt.arctan2(y, x))  # radians between [-pi, pi]
+
+
+        ra = rho * np.sin(theta)
+        dec = rho * np.cos(theta)
+
+        ra_orbit = ra.eval()
+        dec_orbit = dec.eval()
+
+        ra_orbit_sum = tt.sum(ra, axis=-1)
+        dec_orbit_sum = tt.sum(dec, axis=-1)
+
+        ra_orbit_sum = ra_orbit_sum.eval()
+        ra_orbit_sum = ra_orbit_sum.eval()
+
+
+
+    
+    if n_planets > 1:
+        
     else:
         rho_orbit_sum = rho_orbit
 
     theta_orbit = theta
     
     if n_planets > 1:
-        theta_orbit_sum = np.sum(theta_orbit, axis = 1)
+        
     else:
         theta_orbit_sum = theta_orbit
         

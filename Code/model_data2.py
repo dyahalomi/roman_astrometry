@@ -258,21 +258,21 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 
 			# uniform prior on sqrtm_sini and sqrtm_cosi
 			sqrtm_sini_1 = pm.Uniform("sqrtm_sini_1", lower=0, upper=500, 
-									testval = np.sqrt(m_earth)*np.sin(inclination_earth), shape=1)
+									testval = np.sqrt(m_earth*m_sun)*np.sin(inclination_earth), shape=1)
 			
 			sqrtm_cosi_1 = pm.Uniform("sqrtm_cosi_1", lower=0, upper=500, 
-									testval = np.sqrt(m_earth)*np.cos(inclination_earth), shape=1)
+									testval = np.sqrt(m_earth*m_sun)*np.cos(inclination_earth), shape=1)
 
 			# uniform prior on sqrtm_sini and sqrtm_cosi
 			sqrtm_sini_2 = pm.Uniform("sqrtm_sini_2", lower=0, upper=500, 
-									testval = np.sqrt(m_jup)*np.sin(inclination_earth), shape=1)
+									testval = np.sqrt(m_jup*m_sun)*np.sin(inclination_jup), shape=1)
 			
 			sqrtm_cosi_2 = pm.Uniform("sqrtm_cosi_2", lower=0, upper=500, 
-									testval = np.sqrt(m_jup)*np.cos(inclination_earth), shape=1)
+									testval = np.sqrt(m_jup*m_sun)*np.cos(inclination_jup), shape=1)
 
 
 			sqrtm_sini = tt.concatenate([sqrtm_sini_1, sqrtm_sini_2])
-			sqrtm_cosi = tt.concatenate([sqrtm_cosi_1, sqrtm_cosi_2])
+			sqrtm_cosi = tt.concatenate([sqrtm_cosi_2, sqrtm_cosi_2])
 
 			sqrtm_sini = pm.Deterministic("sqrtm_sini", sqrtm_sini)
 			sqrtm_cosi = pm.Deterministic("sqrtm_cosi", sqrtm_cosi)
@@ -382,10 +382,10 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 
 			# Optimize to find the initial parameters
 			map_soln = model.test_point
-			map_soln = pmx.optimize(map_soln, vars=[sqrtm_cosi, sqrtm_sini])
-			map_soln = pmx.optimize(map_soln, vars=[phase])
-			map_soln = pmx.optimize(map_soln, vars=[Omega, ecs])
-			map_soln = pmx.optimize(map_soln, vars=[P, a, phase])
+			#map_soln = pmx.optimize(map_soln, vars=[sqrtm_cosi, sqrtm_sini])
+			#map_soln = pmx.optimize(map_soln, vars=[phase])
+			#map_soln = pmx.optimize(map_soln, vars=[Omega, ecs])
+			#map_soln = pmx.optimize(map_soln, vars=[P, a, phase])
 			map_soln = pmx.optimize(map_soln)
 
 

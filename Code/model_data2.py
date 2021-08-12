@@ -275,10 +275,10 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 			m_planet_2 = pm.Deterministic("m_planet_2", sqrtm_sini_2**2. + sqrtm_cosi_2**2.)
 
 
-			m_planet_1_fixed = pm.Potential("m_planet_1_fixed", tt.switch(m_planet_1 > 10., -np.inf, 0))
-			m_planet_2_fixed = pm.Potential("m_planet_2_fixed", tt.switch(m_planet_2 < 100., -np.inf, 0))
+			pm.Potential("m_planet_1_fixed", tt.switch(m_planet_1 > 10., -np.inf, 0))
+			pm.Potential("m_planet_2_fixed", tt.switch(m_planet_2 < 100., -np.inf, 0))
 			
-			m_planet = pm.Deterministic("m_planet", tt.concatenate([m_planet_1_fixed, m_planet_2_fixed]))
+			m_planet = pm.Deterministic("m_planet", tt.concatenate([m_planet_1, m_planet_2]))
 			m_planet_fit = pm.Deterministic("m_planet_fit", m_planet/m_sun)
 			
 			

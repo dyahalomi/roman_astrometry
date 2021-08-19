@@ -232,11 +232,11 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 			ecc = pm.Deterministic("ecc", tt.sum(ecs ** 2, axis=0))
 			omega = pm.Deterministic("omega", tt.arctan2(ecs[1], ecs[0]))
 			
+			
+
 			# Omegas are co-dependent, so sample them with variables Omega_plus
 			# and Omegas_minus. Omega_plus is (Omega_0 + Omega_1)/2 and 
 			# Omega_minus is (Omega_0 - Omega_1)/2
-			
-		 
 			
 			Omega_plus = pmx.Angle("Omega_plus", shape=1)
 			Omega_minus = pmx.Angle("Omega_minus", shape=1)
@@ -282,22 +282,22 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 				testval = np.sqrt(m_jup*m_sun)*np.cos(inclination_earth), shape=1)
 
 			'''
-			# uniform prior on sqrtm_sini and sqrtm_cosi
+			# uniform prior on sqrtm_sini and sqrtm_cosi (upper 10* min mass to stop planet flipping)
 			sqrtm_sini_1 = pm.Uniform(
-				"sqrtm_sini_1", lower=0, upper=5, 
+				"sqrtm_sini_1", lower=0, upper=10*min_mass(K_RV[0], P_RV[0], ecc_RV[0])*m_sun, 
 				testval = min_mass(K_RV[0], P_RV[0], ecc_RV[0])*m_sun, shape=1)
 			
 			sqrtm_cosi_1 = pm.Uniform(
-				"sqrtm_cosi_1", lower=0, upper=5, 
+				"sqrtm_cosi_1", lower=0, upper=10*min_mass(K_RV[0], P_RV[0], ecc_RV[0])*m_sun, 
 				testval = min_mass(K_RV[0], P_RV[0], ecc_RV[0])*m_sun, shape=1)
 
-			# uniform prior on sqrtm_sini and sqrtm_cosi
+			# uniform prior on sqrtm_sini and sqrtm_cosi (upper 10* min mass to stop planet flipping)
 			sqrtm_sini_2 = pm.Uniform(
-				"sqrtm_sini_2", lower=5, upper=500, 
+				"sqrtm_sini_2", lower=0.1*min_mass(K_RV[1], P_RV[1], ecc_RV[1])*m_sun, upper=500, 
 				testval = min_mass(K_RV[1], P_RV[1], ecc_RV[1])*m_sun, shape=1)
 			
 			sqrtm_cosi_2 = pm.Uniform(
-				"sqrtm_cosi_2", lower=5, upper=500, 
+				"sqrtm_cosi_2", lower=0.1*min_mass(K_RV[1], P_RV[1], ecc_RV[1])*m_sun, upper=500, 
 				testval = min_mass(K_RV[1], P_RV[1], ecc_RV[1])*m_sun, shape=1)
 
 

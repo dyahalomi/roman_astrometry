@@ -166,7 +166,7 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 	print(ecc_RV)
 	print(omega_RV)
 
-	'''
+	
 	T_subtract = 2454000
 
 	P_earth = 365.256
@@ -198,7 +198,7 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 	ecc_RV = [e_earth, e_jup]
 	omega_RV = [omega_earth, omega_jup]
 	
-	'''
+	
 
 	# for predicted orbits
 	t_fine = np.linspace(x_astrometry.min() - 500, x_astrometry.max() + 500, num=1000)
@@ -263,14 +263,22 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 			
 
 			# uniform prior on sqrtm_sini and sqrtm_cosi
-			sqrtm_sini_1 = pm.Uniform("sqrtm_sini_1", lower=0, upper=10, shape=1, testval = 1)
+			sqrtm_sini_1 = pm.Uniform(
+				"sqrtm_sini_1", lower=0, upper=10, shape=1,
+				testval = min_mass(K_RV[0], P_RV[0], ecc_RV[0]))
 			
-			sqrtm_cosi_1 = pm.Uniform("sqrtm_cosi_1", lower=0, upper=10, shape=1, testval = 1)
+			sqrtm_cosi_1 = pm.Uniform(
+				"sqrtm_cosi_1", lower=0, upper=10, shape=1,
+				testval = min_mass(K_RV[0], P_RV[0], ecc_RV[0]))
 
 			# uniform prior on sqrtm_sini and sqrtm_cosi
-			sqrtm_sini_2 = pm.Uniform("sqrtm_sini_2", lower=100, upper=1000, shape=1, testval = 200)
+			sqrtm_sini_2 = pm.Uniform(
+				"sqrtm_sini_2", lower=100, upper=1000, shape=1, 
+				testval = min_mass(K_RV[1], P_RV[1], ecc_RV[1]))
 			
-			sqrtm_cosi_2 = pm.Uniform("sqrtm_cosi_2", lower=100, upper=1000, shape=1, testval = 200)
+			sqrtm_cosi_2 = pm.Uniform(
+				"sqrtm_cosi_2", lower=100, upper=1000, shape=1, 
+				testval = min_mass(K_RV[1], P_RV[1], ecc_RV[1]))
 
 			
 			m_planet_1 = pm.Deterministic("m_planet_1", sqrtm_sini_1**2. + sqrtm_cosi_1**2.)

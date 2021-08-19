@@ -283,9 +283,6 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 
 			'''
 			# uniform prior on sqrtm_sini and sqrtm_cosi
-			print('here')
-			print(min_mass(K_RV[0], P_RV[0], ecc_RV[0])*m_sun)
-			print(min_mass(K_RV[1], P_RV[1], ecc_RV[1])*m_sun)
 			sqrtm_sini_1 = pm.Uniform(
 				"sqrtm_sini_1", lower=0, upper=5, 
 				testval = min_mass(K_RV[0], P_RV[0], ecc_RV[0])*m_sun, shape=1)

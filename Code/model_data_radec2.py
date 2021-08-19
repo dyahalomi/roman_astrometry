@@ -14,6 +14,7 @@ matplotlib.rc('xtick', labelsize=18)
 matplotlib.rc('ytick', labelsize=18)
 
 
+
 def model_rv(periods, Ks, x_rv, y_rv, y_rv_err):
 	t_rv = np.linspace(x_rv.min() - 5, x_rv.max() + 5, 1000)
 
@@ -189,7 +190,7 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 	
 	P_RV = [P_earth, P_jup]
 	K_RV = [semi_amplitude(m_earth, a_earth, e_earth, inclination_earth),
-           semi_amplitude(m_jup, a_jup, e_jup, inclination_jup)]
+		   semi_amplitude(m_jup, a_jup, e_jup, inclination_jup)]
 	tperi_RV = [Tper_earth, Tper_jup]
 	ecc_RV = [e_earth, e_jup]
 	omega_RV = [omega_earth, omega_jup]
@@ -318,7 +319,23 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 			# Add a function for computing the full astrometry model
 			def get_astrometry_model(t, name=""):
 				# First the astrometry induced by the planets
-				rhos, thetas = orbit.get_relative_angles(t, plx)
+
+				# determine and print the star position at desired times
+				pos = theano.function([], orbit.get_star_position(t, plx))()
+
+
+				#pos = tt.sum(pos, axis=-1)
+
+				x,y,z = pos
+
+
+				# calculate rho and theta
+				rho = tt.squeeze(tt.sqrt(x ** 2 + y ** 2))  # arcsec
+				theta = tt.squeeze(tt.arctan2(y, x))  # radians between [-pi, pi]
+				
+				rhos, thetas = rho.eval(), theta.eval()
+				
+				#rhos, thetas = get_star_relative_angles(t, plx)
 				
 				
 				dec = pm.Deterministic("dec" + name, rhos * np.cos(thetas)) # X is north

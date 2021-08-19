@@ -57,9 +57,6 @@ def create_orbit(n_planets, orbit_params):
 
 
 
-
-
-
 def simulate_data(
     n_planets, 
     sigma_rv, 
@@ -168,8 +165,23 @@ def simulate_data(
 
     #-----------
     #-----------
+
+    # determine and print the star position at desired times
+    pos = theano.function([], orbit.get_star_position(times_astrometry, plx))()
+
+
+    #pos = tt.sum(pos, axis=-1)
+
+    x,y,z = pos
+
+
+    # calculate rho and theta
+    rho = tt.squeeze(tt.sqrt(x ** 2 + y ** 2))  # arcsec
+    theta = tt.squeeze(tt.arctan2(y, x))  # radians between [-pi, pi]
     
-    rho, theta = theano.function([], orbit.get_relative_angles(times_astrometry, plx))()
+    rho, theta = rho.eval(), theta.eval()
+    
+    #rho, theta = theano.function([], get_star_relative_angles(times_astrometry, plx))()
 
 
     rho_orbit = rho
@@ -196,17 +208,29 @@ def simulate_data(
     theta_orbit_sum[theta_orbit_sum < -np.pi] += 2*np.pi
 
 
+    # determine and print the star position at desired times
+    pos_observed = theano.function([], orbit.get_star_position(times_observed_astrometry, plx))()
 
-    rho_observed, theta_observed = theano.function([], orbit.get_relative_angles(times_observed_astrometry, plx))()
 
-    rho_observed = rho_observed
+    #pos = tt.sum(pos, axis=-1)
+
+    x_obs,y_obs,z_obs = pos_observed
+
+
+    # calculate rho and theta
+    rho_observed = tt.squeeze(tt.sqrt(x_obs ** 2 + y_obs ** 2))  # arcsec
+    theta_observed = tt.squeeze(tt.arctan2(y_obs, x_obs))  # radians between [-pi, pi]
+    
+    rho_observed, theta_observed = rho_observed.eval(), theta_observed.eval()
+
+    #rho_observed, theta_observed = theano.function([], get_star_relative_angles(times_observed_astrometry, plx))()
+
     
     if n_planets > 1:
         rho_observed_sum = np.sum(rho_observed, axis = 1)
     else:
         rho_observed_sum = rho_observed
 
-    theta_observed = theta_observed
     
     if n_planets > 1:
         theta_observed_sum = np.sum(theta_observed, axis = 1)

@@ -8,6 +8,8 @@ from astropy import units as u
 from astropy.constants import M_earth, M_sun
 from astropy import constants
 import aesara_theano_fallback.tensor as tt
+from aesara_theano_fallback import aesara as theano
+
 
 import matplotlib 
 matplotlib.rc('xtick', labelsize=18) 

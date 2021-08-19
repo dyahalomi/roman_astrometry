@@ -323,19 +323,15 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 				# First the astrometry induced by the planets
 
 				# determine and print the star position at desired times
-				pos = theano.function([], orbit.get_star_position(t, plx))()
-
-
-				#pos = tt.sum(pos, axis=-1)
+				pos = orbit.get_star_position(t, plx)
 
 				x,y,z = pos
 
 
 				# calculate rho and theta
-				rho = tt.squeeze(tt.sqrt(x ** 2 + y ** 2))  # arcsec
-				theta = tt.squeeze(tt.arctan2(y, x))  # radians between [-pi, pi]
-				
-				rhos, thetas = rho.eval(), theta.eval()
+				rhos = tt.squeeze(tt.sqrt(x ** 2 + y ** 2))  # arcsec
+				thetas = tt.squeeze(tt.arctan2(y, x))  # radians between [-pi, pi]
+								
 				
 				#rhos, thetas = get_star_relative_angles(t, plx)
 				

@@ -197,7 +197,7 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 	tperi_RV = [Tper_earth, Tper_jup]
 	ecc_RV = [e_earth, e_jup]
 	omega_RV = [omega_earth, omega_jup]
-	phase_RV = determine_phase(P_RV, tperi_RV)
+	phase_RV = determine_phase(np.array(P_RV), np.array(tperi_RV))
 	
 	
 
@@ -265,40 +265,37 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 
 			# uniform prior on sqrtm_sini and sqrtm_cosi
 			sqrtm_sini_1 = pm.Uniform(
-				"sqrtm_sini_1", lower=0, upper=10, shape=1,
-				testval = m_earth*m_sun*np.sin(inclination_earth))
+				"sqrtm_sini_1", lower=0, upper=500, 
+				testval = min_mass(K_RV[0], P_RV[0], ecc_RV[0]), shape=1)
 			
 			sqrtm_cosi_1 = pm.Uniform(
-				"sqrtm_cosi_1", lower=0, upper=10, shape=1,
-				testval = m_earth*m_sun*np.cos(inclination_earth))
+				"sqrtm_cosi_1", lower=0, upper=500, 
+				testval = min_mass(K_RV[0], P_RV[0], ecc_RV[0]), shape=1)
 
 			# uniform prior on sqrtm_sini and sqrtm_cosi
 			sqrtm_sini_2 = pm.Uniform(
-				"sqrtm_sini_2", lower=100, upper=1000, shape=1, 
-				testval = m_jup*m_sun*np.sin(inclination_jup))
+				"sqrtm_sini_2", lower=0, upper=500, 
+				testval = min_mass(K_RV[1], P_RV[1], ecc_RV[1]), shape=1)
 			
 			sqrtm_cosi_2 = pm.Uniform(
-				"sqrtm_cosi_2", lower=100, upper=1000, shape=1, 
-				testval = m_jup*m_sun*np.cos(inclination_jup))
+				"sqrtm_cosi_2", lower=0, upper=500, 
+				testval = min_mass(K_RV[1], P_RV[1], ecc_RV[1]), shape=1)
 
+
+			sqrtm_sini = pm.Deterministic("sqrtm_sini", tt.concatenate([sqrtm_sini_1, sqrtm_sini_2]))
+			sqrtm_cosi = pm.Deterministic("sqrtm_cosi", tt.concatenate([sqrtm_cosi_1, sqrtm_cosi_2]))
 			
 			m_planet_1 = pm.Deterministic("m_planet_1", sqrtm_sini_1**2. + sqrtm_cosi_1**2.)
 			m_planet_2 = pm.Deterministic("m_planet_2", sqrtm_sini_2**2. + sqrtm_cosi_2**2.)
 
 
-			pm.Potential("m_planet_1_fixed", tt.switch(m_planet_1 > 10., -np.inf, 0))
-			pm.Potential("m_planet_2_fixed", tt.switch(m_planet_2 < 100., -np.inf, 0))
+			#m_planet_1_fixed = pm.Potential("m_planet_1_fixed", tt.switch(m_planet_1 > 10., -np.inf, 0))
+			#m_planet_2_fixed = pm.Potential("m_planet_2_fixed", tt.switch(m_planet_2 < 100., -np.inf, 0))
 			
 			m_planet = pm.Deterministic("m_planet", tt.concatenate([m_planet_1, m_planet_2]))
 			m_planet_fit = pm.Deterministic("m_planet_fit", m_planet/m_sun)
 			
-			
-
-			incl_1 = pm.Deterministic("incl_1", tt.arctan2(sqrtm_sini_1, sqrtm_cosi_1))
-			incl_2 = pm.Deterministic("incl_2", tt.arctan2(sqrtm_sini_1, sqrtm_cosi_1))
-			
-
-			incl = pm.Deterministic("incl", tt.concatenate([incl_1, incl_2]))
+			incl = pm.Deterministic("incl", tt.arctan2(sqrtm_sini, sqrtm_cosi))
 			
 			# add keplers 3 law function
 			a = pm.Deterministic("a", a_from_Kepler3(P, 1.0+m_planet_fit))

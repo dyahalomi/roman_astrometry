@@ -266,20 +266,20 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 			# uniform prior on sqrtm_sini and sqrtm_cosi
 			sqrtm_sini_1 = pm.Uniform(
 				"sqrtm_sini_1", lower=0, upper=500, 
-				testval = min_mass(K_RV[0], P_RV[0], ecc_RV[0]), shape=1)
+				testval = min_mass(K_RV[0], P_RV[0], ecc_RV[0])*2, shape=1)
 			
 			sqrtm_cosi_1 = pm.Uniform(
 				"sqrtm_cosi_1", lower=0, upper=500, 
-				testval = min_mass(K_RV[0], P_RV[0], ecc_RV[0]), shape=1)
+				testval = min_mass(K_RV[0], P_RV[0], ecc_RV[0])*2, shape=1)
 
 			# uniform prior on sqrtm_sini and sqrtm_cosi
 			sqrtm_sini_2 = pm.Uniform(
 				"sqrtm_sini_2", lower=0, upper=500, 
-				testval = min_mass(K_RV[1], P_RV[1], ecc_RV[1]), shape=1)
+				testval = min_mass(K_RV[1], P_RV[1], ecc_RV[1])*2, shape=1)
 			
 			sqrtm_cosi_2 = pm.Uniform(
 				"sqrtm_cosi_2", lower=0, upper=500, 
-				testval = min_mass(K_RV[1], P_RV[1], ecc_RV[1]), shape=1)
+				testval = min_mass(K_RV[1], P_RV[1], ecc_RV[1])*2, shape=1)
 
 
 			sqrtm_sini = pm.Deterministic("sqrtm_sini", tt.concatenate([sqrtm_sini_1, sqrtm_sini_2]))

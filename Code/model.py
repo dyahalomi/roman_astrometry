@@ -166,7 +166,7 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 	print(ecc_RV)
 	print(omega_RV)
 
-	
+	'''
 	T_subtract = 2454000
 
 	P_earth = 365.256
@@ -199,7 +199,7 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 	omega_RV = [omega_earth, omega_jup]
 	phase_RV = determine_phase(np.array(P_RV), np.array(tperi_RV))
 	
-	
+	'''
 
 	# for predicted orbits
 	t_fine = np.linspace(x_astrometry.min() - 500, x_astrometry.max() + 500, num=1000)

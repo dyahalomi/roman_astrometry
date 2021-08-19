@@ -166,6 +166,7 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 	print(ecc_RV)
 	print(omega_RV)
 
+	'''
 	T_subtract = 2454000
 
 	P_earth = 365.256
@@ -197,12 +198,6 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 	ecc_RV = [e_earth, e_jup]
 	omega_RV = [omega_earth, omega_jup]
 	
-	'''
-	P_RV = [P_earth]
-	K_RV = [semi_amplitude(m_earth, a_earth, e_earth, inclination_earth)]
-	tperi_RV = [Tper_earth]
-	ecc_RV = [e_earth]
-	omega_RV = [omega_earth]
 	'''
 
 	# for predicted orbits
@@ -400,9 +395,9 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 
 			# Optimize to find the initial parameters
 			map_soln = model.test_point
-			map_soln = pmx.optimize(map_soln, vars=[m_planet, incl, phase])
-			map_soln = pmx.optimize(map_soln, vars=[m_planet, incl, Omega, phase])
-			map_soln = pmx.optimize(map_soln, vars=[Omega, ecs, phase])
+			map_soln = pmx.optimize(map_soln, vars=[m_planet, incl])
+			map_soln = pmx.optimize(map_soln, vars=[phase])
+			map_soln = pmx.optimize(map_soln, vars=[Omega, ecs])
 			map_soln = pmx.optimize(map_soln, vars=[P, a, phase])
 			map_soln = pmx.optimize(map_soln)
 

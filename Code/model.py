@@ -85,7 +85,6 @@ def model_rv(periods, Ks, x_rv, y_rv, y_rv_err):
 		map_soln = model.test_point
 		map_soln = pmx.optimize(start=map_soln, vars=[tperi])
 		map_soln = pmx.optimize(start=map_soln, vars=[P])
-		map_soln = pmx.optimize(start=map_soln, vars=[ecs])
 		map_soln = pmx.optimize(start=map_soln)
 
 
@@ -124,6 +123,7 @@ def semi_amplitude(m_planet, a, ecc, inclination):
 
 
 def min_mass(K, period, ecc):
+	#from http://exoplanets.astro.yale.edu/workshop/EPRV/Bibliography_files/Radial_Velocity.pdf
 	m_jup = 317.83*3.00273e-6 #units m_sun
 	m_sun = 333030 #earth masses
 
@@ -219,9 +219,7 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 			Omega_diff = pm.Deterministic("Omega_diff", ((Omega_minus)*2)% np.pi)
 			
 
-			
-			# uniform prior on t0, with testval from RV fit
-			#t0 = pm.Uniform("t0", lower=0, upper=10000., shape=2, testval = t0_RV)
+
 		
 			# For these orbits, it can also be better to fit for a phase angle
 			# (relative to a reference time) instead of the time of periasteron
@@ -229,59 +227,23 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 			phase = pmx.Angle("phase", testval=phase_RV, shape=2)
 			tperi = pm.Deterministic("tperi", P * phase / (2 * np.pi))
 			
-			
-			'''
-			# uniform prior on sqrtm_sini and sqrtm_cosi
-			sqrtm_sini_1 = pm.Uniform(
-				"sqrtm_sini_1", lower=0, upper=500, 
-				testval = np.sqrt(m_earth*m_sun)*np.sin(inclination_earth), shape=1)
-			
-			sqrtm_cosi_1 = pm.Uniform(
-				"sqrtm_cosi_1", lower=0, upper=500, 
-				testval = np.sqrt(m_earth*m_sun)*np.cos(inclination_earth), shape=1)
 
-			# uniform prior on sqrtm_sini and sqrtm_cosi
-			sqrtm_sini_2 = pm.Uniform(
-				"sqrtm_sini_2", lower=0, upper=500, 
-				testval = np.sqrt(m_jup*m_sun)*np.sin(inclination_earth), shape=1)
-			
-			sqrtm_cosi_2 = pm.Uniform(
-				"sqrtm_cosi_2", lower=0, upper=500, 
-				testval = np.sqrt(m_jup*m_sun)*np.cos(inclination_earth), shape=1)
 
-			'''
-			# uniform prior on sqrtm_sini and sqrtm_cosi (upper 10* min mass to stop planet flipping)
-			sqrtm_sini_1 = pm.Uniform(
-				"sqrtm_sini_1", lower=0, upper=100*min_mass(K_RV[0], P_RV[0], ecc_RV[0])*m_sun, 
-				testval = min_mass(K_RV[0], P_RV[0], ecc_RV[0])*m_sun, shape=1)
-			
-			sqrtm_cosi_1 = pm.Uniform(
-				"sqrtm_cosi_1", lower=0, upper=100*min_mass(K_RV[0], P_RV[0], ecc_RV[0])*m_sun, 
-				testval = min_mass(K_RV[0], P_RV[0], ecc_RV[0])*m_sun, shape=1)
+			inc_test_vals = np.array([0., 10., 20., 30., 40., 50., 60., 70., 80., 90.])
+			mass_test_vals = min_masses_RV/inc_test_vals
+
 
 			# uniform prior on sqrtm_sini and sqrtm_cosi (upper 10* min mass to stop planet flipping)
-			sqrtm_sini_2 = pm.Uniform(
-				"sqrtm_sini_2", lower=0.01*min_mass(K_RV[1], P_RV[1], ecc_RV[1])*m_sun, upper=1000, 
-				testval = min_mass(K_RV[1], P_RV[1], ecc_RV[1])*m_sun, shape=1)
+			sqrtm_sini = pm.Uniform(
+				"sqrtm_sini_1", lower=0, upper=100*min_mass(K_RV, P_RV, ecc_RV)*m_sun, 
+				testval = min_mass(K_RV, P_RV, ecc_RV)*m_sun, shape=2)
 			
-			sqrtm_cosi_2 = pm.Uniform(
-				"sqrtm_cosi_2", lower=0.01*min_mass(K_RV[1], P_RV[1], ecc_RV[1])*m_sun, upper=1000, 
-				testval = min_mass(K_RV[1], P_RV[1], ecc_RV[1])*m_sun, shape=1)
+			sqrtm_cosi = pm.Uniform(
+				"sqrtm_cosi_1", lower=0, upper=100*min_mass(K_RV, P_RV, ecc_RV)*m_sun, 
+				testval = min_mass(K_RV, P_RV, ecc_RV)*m_sun, shape=2)
 
-
-
-
-			sqrtm_sini = pm.Deterministic("sqrtm_sini", tt.concatenate([sqrtm_sini_1, sqrtm_sini_2]))
-			sqrtm_cosi = pm.Deterministic("sqrtm_cosi", tt.concatenate([sqrtm_cosi_1, sqrtm_cosi_2]))
-			
-			m_planet_1 = pm.Deterministic("m_planet_1", sqrtm_sini_1**2. + sqrtm_cosi_1**2.)
-			m_planet_2 = pm.Deterministic("m_planet_2", sqrtm_sini_2**2. + sqrtm_cosi_2**2.)
-
-
-			#m_planet_1_fixed = pm.Potential("m_planet_1_fixed", tt.switch(m_planet_1 > 10., -np.inf, 0))
-			#m_planet_2_fixed = pm.Potential("m_planet_2_fixed", tt.switch(m_planet_2 < 100., -np.inf, 0))
-			
-			m_planet = pm.Deterministic("m_planet", tt.concatenate([m_planet_1, m_planet_2]))
+		
+			m_planet = pm.Deterministic("m_planet", sqrtm_sini**2. + sqrtm_cosi**2.)
 			m_planet_fit = pm.Deterministic("m_planet_fit", m_planet/m_sun)
 			
 			incl = pm.Deterministic("incl", tt.arctan2(sqrtm_sini, sqrtm_cosi))
@@ -386,8 +348,8 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 
 			# Optimize to find the initial parameters
 			map_soln = model.test_point
-			map_soln = pmx.optimize(map_soln, vars=[P, phase])
 			map_soln = pmx.optimize(map_soln, vars=[m_planet, incl, Omega])
+			map_soln = pmx.optimize(map_soln, vars=[P, phase])
 			map_soln = pmx.optimize(map_soln)
 
 

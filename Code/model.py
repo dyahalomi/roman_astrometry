@@ -84,7 +84,7 @@ def model_rv(periods, Ks, x_rv, y_rv, y_rv_err):
 
 		map_soln = model.test_point
 		map_soln = pmx.optimize(start=map_soln, vars=[tperi])
-		#map_soln = pmx.optimize(start=map_soln, vars=[tperi, ecs, K])
+		map_soln = pmx.optimize(start=map_soln, vars=[P])
 		map_soln = pmx.optimize(start=map_soln)
 
 

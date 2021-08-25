@@ -159,12 +159,13 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 	t_fine = np.linspace(x_astrometry.min() - 500, x_astrometry.max() + 500, num=1000)
 
 
-
-	print(P_RV)
-	print(K_RV)
-	print(tperi_RV)
-	print(ecc_RV)
-	print(omega_RV)
+	print("RV Solutions")
+	print("------------")
+	print("P: ", P_RV)
+	print("K: ", K_RV)
+	print("T_peri: ", tperi_RV)
+	print("eccentricity: ", ecc_RV)
+	print("omega: ", omega_RV)
 
 
 	# for predicted orbits
@@ -384,9 +385,8 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 
 			# Optimize to find the initial parameters
 			map_soln = model.test_point
-			#map_soln = pmx.optimize(map_soln, vars=[m_planet, incl])
-			#map_soln = pmx.optimize(map_soln, vars=[phase])
-			#map_soln = pmx.optimize(map_soln, vars=[Omega, ecs])
+			map_soln = pmx.optimize(map_soln, vars=[P])
+			map_soln = pmx.optimize(map_soln, vars=[Omega, m_planet, incl])
 			#map_soln = pmx.optimize(map_soln, vars=[P, a, phase])
 			map_soln = pmx.optimize(map_soln)
 

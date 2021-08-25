@@ -22,7 +22,7 @@ from pymc3.util import (
     is_transformed_name,
     update_start_vals,
 )
-from scipy.optimize import minimize
+from scipy.optimize import minimize, basinhopping
 
 from .utils import (
     get_args_for_theano_function,
@@ -113,7 +113,9 @@ def optimize(
     kwargs["jac"] = True
 
     try:
-        info = minimize(objective, x0, **kwargs)
+        #info = minimize(objective, x0, **kwargs)
+        print("in the right optimizer")
+        info = basinhopping(objective, x0, **kwargs)
     except (KeyboardInterrupt, StopIteration):
         info = None
     finally:

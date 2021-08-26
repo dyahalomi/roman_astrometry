@@ -176,7 +176,7 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 	# for predicted orbits
 	t_fine = np.linspace(x_astrometry.min() - 500, x_astrometry.max() + 500, num=1000)
 
-	inc_test_vals = np.array(np.radians([0.001, 10., 20., 30., 40., 50., 60., 70., 80., 90.]))
+	inc_test_vals = np.array(np.radians([10., 45., 80.]))
 	model, map_soln, logp = [], [], []
 	for inc in inc_test_vals:
 		print('')
@@ -376,11 +376,19 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 		map_soln.append(a_map_soln)
 		logp.append(a_logp)
 
+	
+	best_index = 0
+	for index in range(0, len(model)):
+		if logp[index] >= logp[best_index]:
+			best_index = index
+
+	the_model = model[best_index]
+	the_map_soln = map_soln[best_index]
+	the_logp = logp[best_index]
 
 
 
-
-	return model, map_soln, logp
+	return the_model, the_map_soln, the_logp
 
 
 

@@ -354,8 +354,7 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 
 				# Optimize to find the initial parameters
 				map_soln = model.test_point
-				map_soln = pmx.optimize(map_soln, vars=[Omega, ecs])
-				map_soln = pmx.optimize(map_soln, vars=[m_planet])
+				map_soln = pmx.optimize(map_soln, vars=[m_planet, incl, Omega])
 				map_soln = pmx.optimize(map_soln)
 
 

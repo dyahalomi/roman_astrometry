@@ -239,13 +239,13 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 				
 
 				
-				# uniform prior on sqrtm_sini and sqrtm_cosi (upper 10* min mass to stop planet flipping)
+				# uniform prior on sqrtm_sini and sqrtm_cosi (upper 100* testval to stop planet flipping)
 				sqrtm_sini = pm.Uniform(
-					"sqrtm_sini_1", lower=0, upper=100*mass_test_vals, 
+					"sqrtm_sini_1", lower=0, upper=100*np.sqrt(mass_test_vals)*np.sin(inc), 
 					testval = np.sqrt(mass_test_vals)*np.sin(inc), shape=2)
 				
 				sqrtm_cosi = pm.Uniform(
-					"sqrtm_cosi_1", lower=0, upper=100*mass_test_vals, 
+					"sqrtm_cosi_1", lower=0, upper=100*np.sqrt(mass_test_vals)*np.cos(inc), 
 					testval = np.sqrt(mass_test_vals)*np.cos(inc), shape=2)
 
 			
@@ -354,7 +354,8 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 
 				# Optimize to find the initial parameters
 				map_soln = model.test_point
-				map_soln = pmx.optimize(map_soln, vars=[Omega, ecs, m_planet])
+				map_soln = pmx.optimize(map_soln, vars=[Omega, ecs])
+				map_soln = pmx.optimize(map_soln, vars=[m_planet])
 				map_soln = pmx.optimize(map_soln)
 
 

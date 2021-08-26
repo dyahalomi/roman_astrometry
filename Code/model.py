@@ -149,8 +149,7 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 	tperi_RV = np.array(rv_map_soln['tperi'])
 	ecc_RV = np.array(rv_map_soln['ecc'])
 	omega_RV = np.array(rv_map_soln['omega'])
-	#min_masses_RV = min_mass(K_RV, P_RV, ecc_RV)
-	min_masses_RV = xo.estimate_minimum_mass(P_RV, x_rv, y_rv, y_rv_err)/m_sun #in m_earth
+	min_masses_RV = xo.estimate_minimum_mass(P_RV, x_rv, y_rv, y_rv_err).value/m_sun*317.83 #in m_earth
 	phase_RV = determine_phase(P_RV, tperi_RV)
 	
 	
@@ -242,12 +241,12 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 				
 				# uniform prior on sqrtm_sini and sqrtm_cosi (upper 10* min mass to stop planet flipping)
 				sqrtm_sini = pm.Uniform(
-					"sqrtm_sini_1", lower=0, upper=100*min_masses_RV*m_sun, 
-					testval = np.sqrt(mass_test_vals*m_sun)*np.sin(inc), shape=2)
+					"sqrtm_sini_1", lower=0, upper=100*mass_test_vals, 
+					testval = np.sqrt(mass_test_vals)*np.sin(inc), shape=2)
 				
 				sqrtm_cosi = pm.Uniform(
-					"sqrtm_cosi_1", lower=0, upper=100*min_masses_RV*m_sun, 
-					testval = np.sqrt(mass_test_vals*m_sun)*np.cos(inc), shape=2)
+					"sqrtm_cosi_1", lower=0, upper=100*mass_test_vals, 
+					testval = np.sqrt(mass_test_vals)*np.cos(inc), shape=2)
 
 			
 				m_planet = pm.Deterministic("m_planet", sqrtm_sini**2. + sqrtm_cosi**2.)
@@ -355,7 +354,7 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 
 				# Optimize to find the initial parameters
 				map_soln = model.test_point
-				map_soln = pmx.optimize(map_soln, vars=[Omega, ecs])
+				map_soln = pmx.optimize(map_soln, vars=[Omega, ecs, m_planet])
 				map_soln = pmx.optimize(map_soln)
 
 

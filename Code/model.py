@@ -174,11 +174,11 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 	t_fine = np.linspace(x_astrometry.min() - 500, x_astrometry.max() + 500, num=1000)
 
 	#inc_test_vals = np.array(np.radians([0.01, 10., 20., 30., 40., 50., 60., 70., 80., 89.9]))
-	inc_test_vals = np.array(np.radians([0.01]))
+	inc_test_vals = np.array(np.radians([90.]))
 	model, map_soln = [], []
 	for inc in inc_test_vals:
 		mass_test_vals = min_masses_RV/np.sin(inc)
-		print(np.sin())
+		print(np.sin(inc))
 		print(min_masses_RV*m_sun)
 		print(mass_test_vals*m_sun)
 

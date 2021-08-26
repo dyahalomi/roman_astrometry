@@ -53,9 +53,7 @@ def model_rv(periods, Ks, x_rv, y_rv, y_rv_err):
 		ecs = pmx.UnitDisk("ecs", shape=(2, 2), testval=0.01 * np.ones((2, 2)))
 		ecc = pm.Deterministic("ecc", tt.sum(ecs ** 2, axis=0))
 		omega = pm.Deterministic("omega", tt.arctan2(ecs[1], ecs[0]))
-		#xo.eccentricity.vaneylen19(
-		#	"ecc_prior", multi=True, shape=2, fixed=True, observed=ecc
-		#)
+
 		
 		# Jitter & a quadratic RV trend
 		logs = pm.Normal("logs", mu=np.log(np.median(y_rv_err)), sd=y_rv_err)
@@ -178,9 +176,8 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 	# for predicted orbits
 	t_fine = np.linspace(x_astrometry.min() - 500, x_astrometry.max() + 500, num=1000)
 
-	#inc_test_vals = np.array(np.radians([0.01, 10., 20., 30., 40., 50., 60., 70., 80., 89.9]))
-	inc_test_vals = np.array(np.radians([45.]))
-	model, map_soln = [], []
+	inc_test_vals = np.array(np.radians([0., 10., 20., 30., 40., 50., 60., 70., 80., 90.]))
+	model, map_soln, logp = [], [], []
 	for inc in inc_test_vals:
 		mass_test_vals = min_masses_RV/np.sin(inc)
 
@@ -212,9 +209,7 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 													 np.sqrt(ecc_RV)*np.sin(omega_RV)]))
 				ecc = pm.Deterministic("ecc", tt.sum(ecs ** 2, axis=0))
 				omega = pm.Deterministic("omega", tt.arctan2(ecs[1], ecs[0]))
-				xo.eccentricity.vaneylen19(
-					"ecc_prior", multi=True, shape=2, fixed=True, observed=ecc
-					)
+
 				
 				
 
@@ -362,7 +357,6 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 				map_soln = model.test_point
 				map_soln = pmx.optimize(map_soln, vars=[Omega])
 				map_soln = pmx.optimize(map_soln, vars=[Omega, m_planet, incl, ecs, phase])
-				#map_soln = pmx.optimize(map_soln, vars=[ecs])
 
 				map_soln = pmx.optimize(map_soln)
 
@@ -372,10 +366,16 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 
 
 		a_model, a_map_soln = get_model()
+		a_logp = a_model.check_test_point(test_point=a_map_soln).sum(axis = 0)
+
 		model.append(a_model)
 		map_soln.append(a_map_soln)
+		logp.append(a_logp)
 
-	return model, map_soln
+
+
+
+	return model, map_soln, logp
 
 
 

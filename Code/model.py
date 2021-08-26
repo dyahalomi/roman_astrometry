@@ -176,9 +176,12 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 	# for predicted orbits
 	t_fine = np.linspace(x_astrometry.min() - 500, x_astrometry.max() + 500, num=1000)
 
-	inc_test_vals = np.array(np.radians([0., 10., 20., 30., 40., 50., 60., 70., 80., 90.]))
+	inc_test_vals = np.array(np.radians([0.001, 10., 20., 30., 40., 50., 60., 70., 80., 90.]))
 	model, map_soln, logp = [], [], []
 	for inc in inc_test_vals:
+		print('')
+		print("trying inclination = " + str(np.degrees(inc)))
+		print("------------")
 		mass_test_vals = min_masses_RV/np.sin(inc)
 
 
@@ -367,10 +370,12 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 
 		a_model, a_map_soln = get_model()
 		a_logp = a_model.check_test_point(test_point=a_map_soln).sum(axis = 0)
+		print('log likelihood = ' + str(a_logp))
 
 		model.append(a_model)
 		map_soln.append(a_map_soln)
 		logp.append(a_logp)
+
 
 
 

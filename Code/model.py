@@ -149,7 +149,8 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 	tperi_RV = np.array(rv_map_soln['tperi'])
 	ecc_RV = np.array(rv_map_soln['ecc'])
 	omega_RV = np.array(rv_map_soln['omega'])
-	min_masses_RV = min_mass(K_RV, P_RV, ecc_RV)
+	#min_masses_RV = min_mass(K_RV, P_RV, ecc_RV)
+	min_masses_RV = xo.estimate_minimum_mass(P_RV, x_rv, y_rv, y_rv_err)/m_sun #in m_earth
 	phase_RV = determine_phase(P_RV, tperi_RV)
 	
 	

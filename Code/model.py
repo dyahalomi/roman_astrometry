@@ -173,9 +173,12 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 	# for predicted orbits
 	t_fine = np.linspace(x_astrometry.min() - 500, x_astrometry.max() + 500, num=1000)
 
-	inc_test_vals = np.array(np.radians([0.01, 10., 20., 30., 40., 50., 60., 70., 80., 89.9]))
+	#inc_test_vals = np.array(np.radians([0.01, 10., 20., 30., 40., 50., 60., 70., 80., 89.9]))
+	inc_test_vals = np.array(np.radians([10.]))
 	model, map_soln = [], []
 	for inc in inc_test_vals:
+		mass_test_vals = min_masses_RV/np.sin(inc)
+		print(mass_test_vals)
 
 
 		def get_model():
@@ -233,7 +236,7 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 				tperi = pm.Deterministic("tperi", P * phase / (2 * np.pi))
 				
 
-				mass_test_vals = min_masses_RV/np.sin(inc)
+				
 				# uniform prior on sqrtm_sini and sqrtm_cosi (upper 10* min mass to stop planet flipping)
 				sqrtm_sini = pm.Uniform(
 					"sqrtm_sini_1", lower=0, upper=100*min_masses_RV*m_sun, 

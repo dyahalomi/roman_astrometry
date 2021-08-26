@@ -149,7 +149,7 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 	tperi_RV = np.array(rv_map_soln['tperi'])
 	ecc_RV = np.array(rv_map_soln['ecc'])
 	omega_RV = np.array(rv_map_soln['omega'])
-	min_masses_RV = xo.estimate_minimum_mass(P_RV, x_rv, y_rv, y_rv_err).value/m_sun*317.83 #in m_earth
+	min_masses_RV = xo.estimate_minimum_mass(P_RV, x_rv, y_rv, y_rv_err).value*317.83 #in m_earth
 	phase_RV = determine_phase(P_RV, tperi_RV)
 	
 	
@@ -179,8 +179,8 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 	for inc in inc_test_vals:
 		mass_test_vals = min_masses_RV/np.sin(inc)
 		print(np.sin(inc))
-		print(min_masses_RV*m_sun)
-		print(mass_test_vals*m_sun)
+		print(min_masses_RV)
+		print(mass_test_vals)
 
 
 		def get_model():
@@ -354,7 +354,8 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 
 				# Optimize to find the initial parameters
 				map_soln = model.test_point
-				map_soln = pmx.optimize(map_soln, vars=[m_planet, incl, Omega])
+				map_soln = pmx.optimize(map_soln, vars=[Omega, ecs])
+				map_soln = pmx.optimize(map_soln, vars=[logP, m_planet, incl, phase])
 				map_soln = pmx.optimize(map_soln)
 
 

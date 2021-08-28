@@ -152,7 +152,7 @@ def determine_phase(P, t_periastron):
 
 
 
-def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err, dec_data, dec_err, parallax):
+def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err, dec_data, dec_err, parallax, n_planets):
 	m_sun = 333030 #earth masses
 	
 	P_RV = np.array(rv_map_soln['P'])
@@ -213,7 +213,7 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 				# so we'll set a broad prior on logP
 				
 				logP = pm.Uniform(
-					"logP", lower=0, upper=np.log(10000.), testval=np.log(P_RV), shape=2
+					"logP", lower=0, upper=np.log(10000.), testval=np.log(P_RV), shape=n_planets
 				)
 				P = pm.Deterministic("P", tt.exp(logP))
 				
@@ -249,7 +249,7 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 				# For these orbits, it can also be better to fit for a phase angle
 				# (relative to a reference time) instead of the time of periasteron
 				# passage directly
-				phase = pmx.Angle("phase", testval=phase_RV, shape=2)
+				phase = pmx.Angle("phase", testval=phase_RV, shape=n_planets)
 				tperi = pm.Deterministic("tperi", P * phase / (2 * np.pi))
 				
 
@@ -257,11 +257,11 @@ def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err,
 				# uniform prior on sqrtm_sini and sqrtm_cosi (upper 100* testval to stop planet flipping)
 				sqrtm_sini = pm.Uniform(
 					"sqrtm_sini", lower=0, upper=100*np.sqrt(mass_test_vals)*np.sin(inc), 
-					testval = np.sqrt(mass_test_vals)*np.sin(inc), shape=2)
+					testval = np.sqrt(mass_test_vals)*np.sin(inc), shape=n_planets)
 				
 				sqrtm_cosi = pm.Uniform(
 					"sqrtm_cosi", lower=0, upper=100*np.sqrt(mass_test_vals)*np.cos(inc), 
-					testval = np.sqrt(mass_test_vals)*np.cos(inc), shape=2)
+					testval = np.sqrt(mass_test_vals)*np.cos(inc), shape=n_planets)
 
 			
 				m_planet = pm.Deterministic("m_planet", sqrtm_sini**2. + sqrtm_cosi**2.)

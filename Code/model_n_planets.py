@@ -17,7 +17,7 @@ matplotlib.rc('ytick', labelsize=18)
 
 
 
-def model_rv(periods, Ks, x_rv, y_rv, y_rv_err, n_planets):
+def minimize_rv(periods, Ks, x_rv, y_rv, y_rv_err, n_planets):
 	t_rv = np.linspace(x_rv.min() - 5, x_rv.max() + 5, 1000)
 	print("minimizing RV only model solutions pre-MCMC")
 	print("------------")
@@ -152,7 +152,7 @@ def determine_phase(P, t_periastron):
 
 
 
-def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err, dec_data, dec_err, parallax, n_planets):
+def minimize_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err, dec_data, dec_err, parallax, n_planets):
 	m_sun = 333030 #earth masses
 	
 	P_RV = np.array(rv_map_soln['P'])

@@ -17,7 +17,7 @@ matplotlib.rc('ytick', labelsize=18)
 
 
 
-def model_rv(periods, Ks, x_rv, y_rv, y_rv_err, n_planets):
+def minimize_rv(periods, Ks, x_rv, y_rv, y_rv_err):
 	t_rv = np.linspace(x_rv.min() - 5, x_rv.max() + 5, 1000)
 	print("minimizing RV only model solutions pre-MCMC")
 	print("------------")
@@ -40,25 +40,21 @@ def model_rv(periods, Ks, x_rv, y_rv, y_rv_err, n_planets):
 
 
 		##  wide uniform prior on t_periastron
-		tperi = pm.Uniform("tperi", lower=x_rv.min(), upper=x_rv.max(), shape=n_planets)
+		tperi = pm.Uniform("tperi", lower=x_rv.min(), upper=x_rv.max(), shape=2)
 		
 		
 		# Wide normal prior for semi-amplitude
-		logK = pm.Uniform("logK", lower=-4, upper=3, shape=n_planets, testval=np.log(Ks))
+		logK = pm.Uniform("logK", lower=-4, upper=3, shape=2, testval=np.log(Ks))
 		
 		K = pm.Deterministic("K", tt.exp(logK))
 		
 		
 		# Eccentricity & argument of periasteron
-		if n_planets == 2:
-			ecs = pmx.UnitDisk("ecs", shape=(2, 2), testval=0.01 * np.ones((2, 2)))
-			ecc = pm.Deterministic("ecc", tt.sum(ecs ** 2, axis=0))
-			omega = pm.Deterministic("omega", tt.arctan2(ecs[1], ecs[0]))
+		ecs = pmx.UnitDisk("ecs", shape=(2, 2), testval=0.01 * np.ones((2, 2)))
+		ecc = pm.Deterministic("ecc", tt.sum(ecs ** 2, axis=0))
+		omega = pm.Deterministic("omega", tt.arctan2(ecs[1], ecs[0]))
 
-		else:
-			ecs = pmx.UnitDisk("ecs", shape=(2, 1), testval=0.01 * np.ones((2, 1)))
-			ecc = pm.Deterministic("ecc", tt.sum(ecs ** 2, axis=0))
-			omega = pm.Deterministic("omega", tt.arctan2(ecs[1], ecs[0]))
+
 
 		
 		# Jitter & a quadratic RV trend
@@ -73,13 +69,10 @@ def model_rv(periods, Ks, x_rv, y_rv, y_rv_err, n_planets):
 			vrad = orbit.get_radial_velocity(t, K=K)
 			pm.Deterministic("vrad" + name, vrad)
 
-			if n_planets == 2 :
-				# Sum over planets and add the background to get the full model
-				return pm.Deterministic("rv_model" + name, tt.sum(vrad, axis=-1))
+			# Sum over planets and add the background to get the full model
+			return pm.Deterministic("rv_model" + name, tt.sum(vrad, axis=-1))
 
-			else:
-				return pm.Deterministic("rv_model" + name, vrad)
-
+			
 
 		# Define the RVs at the observed times
 		rv_model = get_rv_model(x_rv)
@@ -152,7 +145,7 @@ def determine_phase(P, t_periastron):
 
 
 
-def model_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err, dec_data, dec_err, parallax):
+def minimize_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_err, dec_data, dec_err, parallax):
 	m_sun = 333030 #earth masses
 	
 	P_RV = np.array(rv_map_soln['P'])

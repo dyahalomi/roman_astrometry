@@ -9,6 +9,8 @@ from astropy.constants import M_earth, M_sun
 from astropy import constants
 import aesara_theano_fallback.tensor as tt
 from aesara_theano_fallback import aesara as theano
+import arviz as az
+import corner
 
 
 import matplotlib 
@@ -394,7 +396,220 @@ def minimize_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_e
 	return the_model, the_map_soln, the_logp
 
 
+def model_both(model, map_soln, tune_steps, draw_steps):
+	print('Joint RV + Astometry Minimization Solutions:')
+	print("------------")
 
+	print('m_planet: ' + str(map_soln['m_planet']))
+	print('incl: ' + str(map_soln['incl']))
+	print('Omega: ' + str(map_soln['Omega']))
+	print('tperi: ' + str(map_soln['tperi']))
+	print('P: ' + str(map_soln['P']))
+	print('ecc: ' + str(map_soln['ecc']))
+	print('omega: ' + str(map_soln['omega']))
+
+	with model:
+		trace = pmx.sample(
+			tune=tune_steps,
+			draws=draw_steps,
+			start=map_soln,
+			cores=2,
+			chains=2,
+			target_accept=0.95,
+			return_inferencedata=True,
+		)
+
+	return trace
+
+
+
+def make_plots(trace, orbits_params, n_planets):
+
+	if n_planets == 2:
+		[orbit_params_earth, orbit_params_jup] = orbit_params
+		
+		[P_earth, e_earth, Tper_earth, omega_earth, Omega_earth, 
+		inclination_earth, m_earth] = orbit_params_earth
+
+
+		[P_2, e_jup, Tper_jup, omega_jup, Omega_jup, 
+		inclination_jup, m_jup] = orbit_params_jup
+
+
+		a_true_earth = a_from_Kepler3(P_earth, 1.0+m_earth)
+		a_true_jup = a_from_Kepler3(P_jup, 1.0+m_jup)
+
+		#[P1, P2, e1, e2, omega1, omega2, Omega_sum, Omega_minus, incl1, incl2, plx, m1, m2, a1, a2, Tper1, Tper2]
+		truths = [P_earth, P_jup, e_earth, e_jup, omega_earth, omega_jup, 
+		Omega_earth+Omega_jup, Omega_earth-Omega_jup, inclination_earth, inclination_jup, 
+		0.1, m_earth*m_sun, m_jup*m_sun, a_true_earth, a_true_jup, Tper_earth, Tper_jup]
+
+
+		#[P1, P2, e1, e2, omega1, omega2, incl1, incl2, Tper1, Tper2, m1, m2, a1, a2]
+		truth_chain_plot = [P_earth, P_jup, e_earth, e_jup, omega_earth, omega_jup, 
+		inclination_earth, inclination_jup, Tper_earth, Tper_jup, m_earth*m_sun, m_jup*m_sun, a_true_earth, a_true_jup]
+
+
+
+
+
+
+	else:
+		[P, e, Tper, omega, Omega, inclination, m] = orbit_params
+
+		a = a_from_Kepler3(P, 1.0+m)
+
+		#[P1, e1, omega1, Omega1, incl1, plz, m1, a1, Tper]
+		truths = [P, e, omega, Omega, inclination, 0.1, m*m_sun, a_true_earth, Tper]
+
+		#[P1, e1, omega1, incl1, Tper1, m1, a1]
+		truth_chain_plot = [P, e, omega, inclination, Tper, m*m_sun, a_true_earth]
+
+
+
+
+	# plot the table summarizing MCMC results
+	az.summary(
+		trace,
+		var_names=["P", "tperi", "omega", "Omega_sum", "Omega_plus", "Omega_minus", 
+				   "incl", "ecc", "plx", "m_planet", "a"],
+	)
+
+
+	plt.show()
+
+
+
+
+
+	# plot the corner plots
+	_ = corner.corner(
+		trace, var_names=["P", "ecc", "omega", "Omega_sum", "Omega_minus", "incl", 
+						  "plx", "m_planet", "a", 'tperi'], quantiles=[0.16, 0.5, 0.84],
+						   show_titles=True, title_kwargs={"fontsize": 13}, 
+						   truths = truths, truth_color = "#03003a"
+	)
+
+	plt.show()
+
+
+
+	# plot the corner plots for Omegas
+	_ = corner.corner(
+		trace, var_names=["Omega_plus", "Omega_sum", "Omega_minus", "Omega"], quantiles=[0.16, 0.5, 0.84],
+						   show_titles=True, title_kwargs={"fontsize": 13}
+	)
+
+	plt.show()
+
+
+	# plot the posterior predictions for the astometry data
+	ekw = dict(fmt=".k", lw=0.5)
+
+	fig, ax = plt.subplots(nrows=2, sharex=True, figsize=(9, 9))
+	ax[0].set_ylabel(r'$\rho\,$ ["]')
+	ax[1].set_ylabel(r"P.A. [radians]")
+	ax[1].set_xlabel(r"time [days]")
+
+	tot_rho_err = np.sqrt(
+		rho_err ** 2
+		+ np.exp(2 * np.median(trace.posterior["log_rho_s"].values, axis=(0, 1)))
+	)
+	tot_theta_err = np.sqrt(
+		theta_err ** 2
+		+ np.exp(2 * np.median(trace.posterior["log_theta_s"].values, axis=(0, 1)))
+	)
+
+	ax[0].errorbar(x_astrometry, rho_data, yerr=tot_rho_err, **ekw)
+	q = np.percentile(trace.posterior["rho_model_pred"].values, [16, 84], axis=(0, 1))
+	ax[0].fill_between(t_fine, q[0], q[1], color="#773f6a", alpha=0.8, lw=1)
+
+	ax[1].errorbar(x_astrometry, theta_data, yerr=tot_theta_err, **ekw)
+	q = np.percentile(trace.posterior["theta_model_pred"].values, [16, 84], axis=(0, 1))
+	ax[1].fill_between(t_fine, q[0], q[1], color="#773f6a", alpha=0.8, lw=1)
+
+	ax[-1].set_xlim(t_fine[0], t_fine[-1])
+	_ = ax[0].set_title("posterior inferences")
+
+	plt.show()
+
+
+
+
+	# plot the posterior predictions for the RV data
+	rv_pred = trace.posterior["rv_model_pred"].values
+	pred = np.percentile(rv_pred, [16, 50, 84], axis=(0, 1))
+
+	fig, ax = plt.subplots(1, figsize = [15,10], sharey=True)
+
+	ax.errorbar(x_rv, y_rv, yerr=y_rv_err, fmt=".k", alpha = 0.3, label='data', zorder = 0)
+	ax.plot(t, pred[1], color="#773f6a", label="model", zorder = 1)
+	art = ax[0].fill_between(t, pred[0], pred[2], color="#773f6a", alpha=0.3)
+	art.set_edgecolor("none")
+
+	ax.legend(fontsize=10)
+	ax.set_xlim(t.min(), t.max())
+	ax.set_xlabel("time [days]")
+	ax.set_ylabel("radial velocity [m/s]")
+	ax.set_title("MCMC posterior and data")
+
+
+
+	plt.legend(fontsize=10)
+	plt.xlim(t.min(), t.max())
+	plt.xlabel("time [days]")
+	plt.ylabel("radial velocity [m/s]")
+	_ = plt.title("posterior constraints")
+
+	plt.show()
+
+
+
+	# plot the chains
+	parameters = ["P", "ecc", "omega", "incl", "tperi", "m_planet", "a"]
+	for ii in range(0, len(parameters)):
+		plot_truth = False
+		param = parameters[ii]
+		
+		true_vals_earth = truth_chain_plot[2*ii]
+		true_vals_jup = truth_chain_plot[2*ii+1]
+		plot_truth = True
+		
+		fig, ax = plt.subplots(1,2, figsize = (15,3))
+		planet1_chain1 = trace.posterior[param].values[:, :, 0][0]
+		planet1_chain2 = trace.posterior[param].values[:, :, 0][1]
+		
+		planet2_chain1 = trace.posterior[param].values[:, :, 1][0]
+		planet2_chain2 = trace.posterior[param].values[:, :, 1][1]
+		
+		
+		nstep = np.arange(1, len(planet1_chain1)+1, 1)
+		
+		
+		ax[0].plot(nstep, planet1_chain1)
+		ax[0].plot(nstep, planet1_chain2)
+		
+		if plot_truth:
+			ax[0].axhline(y=true_vals_earth, color = 'r', label = 'truth')
+		ax[0].set_title("Sun-b", fontsize = 18)
+		ax[0].legend(fontsize = 18)
+		
+		ax[1].plot(nstep, planet2_chain1)
+		ax[1].plot(nstep, planet2_chain2)
+		
+		if plot_truth:
+			ax[1].axhline(y=true_vals_jup, color = 'r', label = 'truth')
+		ax[1].set_title("Sun-c", fontsize = 18)
+		ax[1].legend(fontsize = 18)
+
+		fig.suptitle(param, fontsize = 18)
+		fig.tight_layout()
+		plt.show()
+
+
+
+
+	return "plotting complete"
 
 
 

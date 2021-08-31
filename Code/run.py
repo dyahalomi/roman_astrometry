@@ -167,8 +167,8 @@ def run(inc, roman_err):
 	rv_orbit_sum, 
 	rv_sim, 
 	rv_sim_sum,
-	times_astrometry,
-	times_observed_astrometry,
+	times_rv,
+	times_observed_rv,
 	['#366537', '#db372b', '#00257c'],
 	['Earth', 'Jupiter'])
 
@@ -213,6 +213,8 @@ def run(inc, roman_err):
 	##################
 	##################
 
+	################
+	################
 	#rename variables in more consistent way for modeling
 	x_rv = np.array(times_observed_rv)
 	y_rv = rv_sim_sum
@@ -220,9 +222,9 @@ def run(inc, roman_err):
 
 	x_astrometry = np.array(times_observed_astrometry)
 	ra_data = ra_sim_sum
-	ra_err = np.full(np.shape(ra_data), sigma_ra)
+	ra_err = np.full(np.shape(ra_data), roman_err)
 	dec_data = dec_sim_sum
-	dec_err = np.full(np.shape(dec_data), sigma_dec)
+	dec_err = np.full(np.shape(dec_data), roman_err)
 
 
 	# make a fine grid that spans the observation window for plotting purposes
@@ -236,6 +238,8 @@ def run(inc, roman_err):
 
 
 
+	################
+	################
 	#Lombs Scargle Periodogram on RV data
 	frequency, power = LombScargle(x_rv, y_rv).autopower()
 	period = 1/frequency
@@ -244,9 +248,6 @@ def run(inc, roman_err):
 	period_cut1 = period[period > 10]
 	power_cut1 = power[period > 10]
 
-	plt.plot(period_cut1, power_cut1) 
-	#plt.xlim(1000,10000)
-	plt.show()
 
 
 	indices = power_cut1.argsort()[-1:][::-1]
@@ -268,6 +269,8 @@ def run(inc, roman_err):
 
 
 	
+	################
+	################
 	#minimize on RV data
 	periods_guess = [period2, period1]
 
@@ -277,6 +280,8 @@ def run(inc, roman_err):
 	rv_map_soln = minimize_rv(periods_guess, Ks_guess, x_rv, y_rv, y_rv_err)
 
 
+	################
+	################
 	#plot rv minimization results
 	ekw = dict(fmt=".k", lw=0.5)
 	fig, ax = plt.subplots(nrows=2, sharex=True, figsize = [15,13])
@@ -307,14 +312,18 @@ def run(inc, roman_err):
 
 
 
-
+	################
+	################
 	#minimize on joint model
 	parallax = 0.1 # arcsec
 	model, map_soln, logp = minimize_both(
 		rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, 
-		ra_data, roman_err, dec_data, roman_err, parallax
+		ra_data, ra_err, dec_data, dec_err, parallax
 	)
 
+	
+	################
+	################
 	#plot ra and dec minimizations vs time
 	fig, ax = plt.subplots(nrows=4, sharex=True, figsize=(6, 8))
 	ax[0].set_ylabel(r"$\Delta \alpha \cos \delta$ ['']")
@@ -347,8 +356,8 @@ def run(inc, roman_err):
 	_ = ax[0].set_title("map orbit")
 
 
-
-
+	################
+	################
 	#plot ra vs. dec
 	fig, ax = plt.subplots(1, figsize = [9,9])
 	ax.plot(map_soln["ra_model_fine"], map_soln["dec_model_fine"], 
@@ -367,6 +376,9 @@ def run(inc, roman_err):
 	plt.show()
 
 
+
+	################
+	################
 	#plot rv vs time for joint minimization
 	fig, ax = plt.subplots(nrows=2, sharex=True, figsize = [15,13])
 
@@ -394,7 +406,8 @@ def run(inc, roman_err):
 	plt.show()
 
 
-
+	################
+	################
 	#run full MCMC
 	np.random.seed(1234)
 	with model:
@@ -408,15 +421,6 @@ def run(inc, roman_err):
 			return_inferencedata=True,
 		)
 
-
-
-	#save trace and model
-	with open('./traces/inc' + str(inc) + '_gaia10_roman5_err' + str(int(10e6*roman_err)).pkl, 'wb') as buff:
-		pickle.dump({'model': model, 'trace': trace}, buff)
-
-
-	return model, trace
-
 	##################
 	##################
 	##################
@@ -427,6 +431,18 @@ def run(inc, roman_err):
 	##################
 	##################
 	##################
+
+
+	################
+	################
+	#save trace and model
+	with open('./traces/inc' + str(inc) + '_gaia10_roman5_err' + str(int(10e6*roman_err)).pkl, 'wb') as buff:
+		pickle.dump({'model': model, 'trace': trace}, buff)
+
+
+	return model, trace
+
+
 
 
 

@@ -188,6 +188,8 @@ def run(inc, roman_err):
 	['#366537', '#db372b', '#00257c'],
 	['Earth', 'Jupiter'])
 
+	plt.show()
+
 
 	##################
 	##################
@@ -436,11 +438,20 @@ def run(inc, roman_err):
 	################
 	################
 	#save trace and model
-	with open('./traces/inc' + str(inc) + '_gaia10_roman5_err' + str(int(10e6*roman_err)).pkl, 'wb') as buff:
+	with open('./traces/inc' + str(int(inc)) + '_gaia10_roman5_err' + str(int(10e6*roman_err)) + '.pkl', 'wb') as buff:
 		pickle.dump({'model': model, 'trace': trace}, buff)
 
 
 	return model, trace
+
+
+
+incs = [10., 45.]
+errs = [5e-6, 10e-6, 20e-6]
+
+for inc in incs:
+	for roman_err in errs:
+		run(inc, roman_err)
 
 
 

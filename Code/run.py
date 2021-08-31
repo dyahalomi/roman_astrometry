@@ -438,7 +438,7 @@ def run(inc, roman_err):
 	################
 	################
 	#save trace and model
-	with open('./traces/inc' + str(int(inc)) + '_gaia10_roman5_err' + str(int(10e6*roman_err)) + '.pkl', 'wb') as buff:
+	with open('./traces/inc' + str(int(inc)) + '_gaia10_roman5_err' + str(int(1e6*roman_err)) + '.pkl', 'wb') as buff:
 		pickle.dump({'model': model, 'trace': trace}, buff)
 
 

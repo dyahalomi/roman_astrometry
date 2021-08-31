@@ -160,6 +160,37 @@ def run(inc, roman_err):
 	dec_sim = np.append(dec_sim, dec_results[2], axis=0)
 	dec_sim_sum = np.append(dec_sim_sum, dec_results[3], axis=0)
 
+	
+	plot_rv_signal(
+	2, 
+	rv_orbit, 
+	rv_orbit_sum, 
+	rv_sim, 
+	rv_sim_sum,
+	times_rv,
+	times_observed_rv,
+	['#366537', '#db372b', '#00257c'],
+	['Earth', 'Jupiter'])
+
+
+	plot_astrometry_signal(
+	2, 
+	ra_orbit, 
+	ra_orbit_sum, 
+	ra_sim, 
+	ra_sim_sum, 
+	dec_orbit, 
+	dec_orbit_sum, 
+	dec_sim, 
+	dec_sim_sum,
+	times_astrometry,
+	times_observed_astrometry,
+	['#366537', '#db372b', '#00257c'],
+	['Earth', 'Jupiter'])
+
+	plt.show()
+	
+
 	##################
 	##################
 	##################
@@ -253,6 +284,39 @@ def run(inc, roman_err):
 
 	################
 	################
+	
+	#plot rv minimization results
+	ekw = dict(fmt=".k", lw=0.5)
+	fig, ax = plt.subplots(nrows=2, sharex=True, figsize = [15,13])
+
+	tot_rv_err = np.sqrt(y_rv_err ** 2 + np.exp(2 * rv_map_soln["logs"]))
+
+
+	ax[0].errorbar(x_rv, y_rv, yerr=tot_rv_err, fmt=".k", alpha = 0.05, label='data', zorder=1)
+	ax[0].plot(t_rv, rv_map_soln["rv_model_pred"], "b", label="combined model", zorder=2, color = '#773f6a')
+	ax[0].plot(t_rv, rv_map_soln["vrad_pred"], "--k", alpha=0.5, label="individual models")
+
+	ax[0].legend(fontsize=10)
+	ax[0].set_xlim(t_rv.min(), t_rv.max())
+	ax[0].set_xlabel("time [days]")
+	ax[0].set_ylabel("radial velocity [m/s]")
+	ax[0].set_title("RV Minimization from Joint Model")
+
+
+	ax[1].axhline(0.0, color="0.5")
+	ax[1].errorbar(
+		x_rv, y_rv - rv_map_soln["rv_model"], yerr=tot_rv_err, **ekw
+	)
+	ax[1].set_xlabel("time [days]")
+	ax[1].set_ylabel("RV residuals [m/s]")
+
+
+	plt.show()
+	
+
+
+	################
+	################
 	#minimize on joint model
 	parallax = 0.1 # arcsec
 	model, map_soln, logp = minimize_both(
@@ -260,6 +324,91 @@ def run(inc, roman_err):
 		ra_data, ra_err, dec_data, dec_err, parallax
 	)
 
+	
+	################
+	################
+	
+	#plot ra and dec minimizations vs time
+	fig, ax = plt.subplots(nrows=4, sharex=True, figsize=(6, 8))
+	ax[0].set_ylabel(r"$\Delta \alpha \cos \delta$ ['']")
+	ax[1].set_ylabel(r"$\Delta \alpha \cos \delta$ [''] residuals")
+	ax[2].set_ylabel(r"$\Delta \delta$ ['']")
+	ax[3].set_ylabel(r"$\Delta \delta$ [''] residuals")
+
+
+	tot_ra_err = np.sqrt(ra_err ** 2 + np.exp(2 * map_soln["log_ra_s"]))
+	tot_dec_err = np.sqrt(dec_err ** 2 + np.exp(2 * map_soln["log_dec_s"]))
+
+	ax[0].errorbar(x_astrometry, ra_data, yerr=tot_ra_err, **ekw)
+	ax[0].plot(t_fine, map_soln["ra_model_fine"], color="#773f6a")
+
+	ax[1].axhline(0.0, color="0.5")
+	ax[1].errorbar(
+		x_astrometry, ra_data - map_soln["ra_model"], yerr=tot_ra_err, **ekw
+	)
+
+
+	ax[2].plot(t_fine, map_soln["dec_model_fine"], color="#773f6a")
+	ax[2].errorbar(x_astrometry, dec_data, yerr=tot_dec_err, **ekw)
+
+	ax[3].axhline(0.0, color="0.5")
+	ax[3].errorbar(
+		x_astrometry, dec_data - map_soln["dec_model"], yerr=tot_dec_err, **ekw
+	)
+
+	ax[3].set_xlim(t_fine[0], t_fine[-1])
+	_ = ax[0].set_title("map orbit")
+
+
+	################
+	################
+	#plot ra vs. dec
+	fig, ax = plt.subplots(1, figsize = [9,9])
+	ax.plot(map_soln["ra_model_fine"], map_soln["dec_model_fine"], 
+			color="#773f6a", lw=1, label = "RV + astrometry model")
+
+
+	ax.plot(ra_data, dec_data, ".k", label = "data")
+
+	ax.set_ylabel(r"$\Delta \delta$ ['']")
+	ax.set_xlabel(r"$\Delta \alpha \cos \delta$ ['']")
+	ax.invert_xaxis()
+	ax.plot(0, 0, "k*")
+	ax.set_aspect("equal", "datalim")
+	ax.set_title("initial orbit")
+	ax.legend()
+	plt.show()
+
+
+
+	################
+	################
+	#plot rv vs time for joint minimization
+	fig, ax = plt.subplots(nrows=2, sharex=True, figsize = [15,13])
+
+	tot_rv_err = np.sqrt(y_rv_err ** 2 + np.exp(2 * map_soln["log_rv"]))
+
+	ax[0].errorbar(x_rv, y_rv, yerr=tot_rv_err, fmt=".k", alpha = 0.05, label='data', zorder=1)
+	ax[0].plot(t_rv, map_soln["rv_model_pred"], "b", label="combined model", zorder=2, color = '#773f6a')
+	ax[0].plot(t_rv, map_soln["vrad_pred"], "--k", alpha=0.5, label="individual models")
+
+	ax[0].legend(fontsize=10)
+	ax[0].set_xlim(t_rv.min(), t_rv.max())
+	ax[0].set_xlabel("time [days]")
+	ax[0].set_ylabel("radial velocity [m/s]")
+	ax[0].set_title("RV Minimization from Joint Model")
+
+
+	ax[1].axhline(0.0, color="0.5")
+	ax[1].errorbar(
+		x_rv, y_rv - map_soln["rv_model"], yerr=tot_rv_err, **ekw
+	)
+	ax[1].set_xlabel("time [days]")
+	ax[1].set_ylabel("RV residuals [m/s]")
+
+
+	plt.show()
+	
 
 	################
 	################
@@ -298,14 +447,6 @@ def run(inc, roman_err):
 	return model, trace
 
 
-
-incs = [10., 45.]
-errs = [5e-6, 10e-6, 20e-6]
-
-for inc in incs:
-	for roman_err in errs:
-		print('inc: ' + str(inc) + ', roman_err: ' + str(int(1e6*roman_err)))
-		run(inc, roman_err)
 
 
 

@@ -332,14 +332,17 @@ def plot_rv_signal(
     
     if n_planets > 1:
         for ii in range(0, n_planets):
+            ax0.plot(times_rv, rv_orbit.T[ii], color = 'k')
             ax0.plot(times_observed_rv, rv_sim.T[ii], 'o', color = colors[ii], label = planet_names[ii], alpha = 0.3)
     else:
+        ax0.plot(times_rv, rv_orbit, color = 'k')
         ax0.plot(times_observed_rv, rv_sim, 'o', color = colors[0], label = planet_names[0], alpha = 0.3)
     
     ax0.legend(fontsize = 27, loc = 2)
     ax0.set_xlabel("time [BJD]", fontsize = 27)
     ax0.set_ylabel("RV [m/s]", fontsize = 27)
 
+    ax1.plot(times_rv, rv_orbit_sum, color = 'k')
     ax1.plot(times_observed_rv, rv_sim_sum, 'o', color = colors[n_planets], label = 'combined signal', alpha = 0.3)
 
     ax1.set_xlabel("time [BJD]", fontsize = 27)
@@ -378,9 +381,11 @@ def plot_astrometry_signal(
     
     if n_planets > 1:
         for ii in range(0, n_planets):
-            ax0.plot(times_observed_astrometry, ra_sim.T[ii], 'o', color = colors[ii], label = planet_names[ii])
+            ax0.plot(times_astrometry, ra_orbit.T[ii], color = 'k')
+            ax0.plot(times_observed_astrometry, ra_sim.T[ii], 'o', color = colors[ii], label = planet_names[ii], alpha = 0.3)
     else:
-        ax0.plot(times_observed_astrometry, ra_sim, 'o', color = colors[0], label = planet_names[0])
+        ax0.plot(times_astrometry, ra_orbit, color = 'k')
+        ax0.plot(times_observed_astrometry, ra_sim, 'o', color = colors[0], label = planet_names[0], alpha = 0.3)
     
     ax0.set_ylabel(r"$\Delta \alpha \cos \delta$ ['']", fontsize = 27)
     for tick in ax0.get_xticklabels():
@@ -391,9 +396,11 @@ def plot_astrometry_signal(
     
     if n_planets > 1:
         for ii in range(0, n_planets):
-            ax1.plot(times_observed_astrometry, dec_sim.T[ii], 'o', color = colors[ii], label = planet_names[ii])
+            ax1.plot(times_astrometry, dec_orbit.T[ii], color = 'k')
+            ax1.plot(times_observed_astrometry, dec_sim.T[ii], 'o', color = colors[ii], label = planet_names[ii], alpha = 0.3)
     else:
-        ax1.plot(times_observed_astrometry, dec_sim, 'o',  color = colors[0], label = planet_names[0])
+        ax1.plot(times_astrometry, dec_orbit, color = 'k')
+        ax1.plot(times_observed_astrometry, dec_sim, 'o',  color = colors[0], label = planet_names[0], alpha = 0.3)
 
     
     ax1.set_ylabel(r"$\Delta \delta$ ['']", fontsize = 27)
@@ -404,12 +411,14 @@ def plot_astrometry_signal(
 
 
     
-    ax2.plot(times_observed_astrometry, ra_sim_sum, 'o', color = colors[n_planets], label = 'combined signal')
+    ax2.plot(times_astrometry, ra_orbit_sum, color = 'k')
+    ax2.plot(times_observed_astrometry, ra_sim_sum, 'o', color = colors[n_planets], label = 'combined signal', alpha = 0.3)
     for tick in ax3.get_xticklabels():
         tick.set_rotation(30)
     ax2.legend(fontsize = 27, loc = 2)
     
-    ax3.plot(times_observed_astrometry, dec_sim_sum, 'o', color = colors[n_planets], label = 'combined signal')
+    ax3.plot(times_astrometry, dec_orbit_sum, color = 'k')
+    ax3.plot(times_observed_astrometry, dec_sim_sum, 'o', color = colors[n_planets], label = 'combined signal', alpha = 0.3)
     ax2.set_xlabel("time [BJD]", fontsize = 27)
     ax3.legend(fontsize = 27, loc = 2)
 
@@ -426,6 +435,10 @@ def plot_astrometry_signal(
 
 
     fig, ax = plt.subplots(1, 1, figsize = [10, 10])
+
+    # plot simulated orbit
+    ax.plot(ra_orbit_sum, dec_orbit_sum, color="k", lw=1)
+
 
     # plot simulated data
     ax.plot(ra_sim_sum, dec_sim_sum, 'o', color = colors[n_planets], label = "combined signal")

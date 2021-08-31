@@ -371,6 +371,9 @@ def plot_astrometry_signal(
     planet_names):
     
     
+
+    times_astrometry = np.arange(np.min(times_astrometry), np.max(times_astrometry), 10000)
+    
     fig, ax = plt.subplots(2, 2, figsize = [13,10], sharex='col', sharey='row')
     fig.suptitle("Astrometric Signal", fontsize = 45)
     ax0 = ax[0][0]

@@ -248,7 +248,7 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err):
 	period1 = np.array(period_cut1[indices][0])
 	print('LS period 1: ' + str(period1))
 
-	period1_min_cut = 2000
+	period1_min_cut = 500
 	#period_cut1 > period1_min_cut so we don't double count
 
 	period_cut2 = period_cut1[period_cut1 < period1_min_cut]
@@ -305,8 +305,13 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err):
 	################
 	#save trace and model
 	#with open('./traces/inc' + str(int(inc)) + '_gaia10_roman5_err' + str(int(1e6*roman_err)) + '.pkl', 'wb') as buff:
-	with open('./traces/inc' + str(int(inc_earth)) + '_gaia10_roman0_errNA.pkl', 'wb') as buff:
-		pickle.dump({'model': joint_model, 'trace': trace}, buff)
+	if roman_err is not None:
+		with open('./traces/period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_roman' + str(int(1e6*roman_err)) + '.pkl', 'wb') as buff:
+			pickle.dump({'model': joint_model, 'trace': trace}, buff)
+
+	else:
+		with open('./traces/period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_romanNA.pkl', 'wb') as buff:
+			pickle.dump({'model': joint_model, 'trace': trace}, buff)
 
 
 	return joint_model, trace

@@ -217,8 +217,8 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err):
 
 
 	if roman_err is not None:
-		ra_err = np.concatenate(ra_gaia_err, ra_roman_err)
-		dec_err = np.concatenate(dec_gaia_err, dec_roman_err)
+		ra_err = np.concatenate((ra_gaia_err, ra_roman_err))
+		dec_err = np.concatenate((dec_gaia_err, dec_roman_err))
 
 	else:
 		ra_err = ra_gaia_err

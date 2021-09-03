@@ -27,7 +27,13 @@ matplotlib.rc('xtick', labelsize=18)
 matplotlib.rc('ytick', labelsize=18)
 
 
-def simulate_and_model_data(inc, roman_err):
+def simulate_and_model_data(inc_earth, period_jup, roman_err):
+
+	'''
+	inc_earth = Earth inclination in degrees (Jupiter assumed 1.31 degrees greater than this value)
+	period_jup = Jupiter period in days 
+	roman_err = roman error in arcseconds, if None assumed no Roman observations
+	'''
 
 
 
@@ -52,12 +58,12 @@ def simulate_and_model_data(inc, roman_err):
 	Tper_earth= 2454115.5208333 - T_subtract
 	omega_earth = np.radians(102.9)
 	Omega_earth = np.radians(0.0)
-	inclination_earth = np.radians(inc)
+	inclination_earth = np.radians(inc_earth)
 	m_earth = 1*3.00273e-6 #units m_sun
 
 
 
-	P_jup = 4327.631
+	P_jup = period_jup	
 	e_jup = 0.0484
 	Tper_jup = 2455633.7215278 - T_subtract
 	omega_jup = np.radians(274.3) - 2*np.pi
@@ -69,20 +75,16 @@ def simulate_and_model_data(inc, roman_err):
 	m_sun = 333030 #earth masses
 
 
+	#add gaia observing times
 	times_observed_astrometry_gaia = []
 	t_0 = int(Tper_earth)
 	for ii in range(t_0, t_0+3600):
 		if ii % 90 == 0:
 			times_observed_astrometry_gaia.append(ii)
 
-	'''
-	t_1 =  times_observed_astrometry_gaia[-1]+1800
-	times_observed_astrometry_roman = []
-	for ii in range(t_1, t_1+1800):
-		if ii % 90 == 0:
-			times_observed_astrometry_roman.append(ii)	
-	'''
+	
 			
+	#add THE observing times
 	times_observed_rv = []
 	t_0 = int(Tper_earth)
 	add_data = True
@@ -107,8 +109,8 @@ def simulate_and_model_data(inc, roman_err):
 
 	sigma_rv = 0.3
 
-	sigma_ra_gaia = 1e-5
-	sigma_dec_gaia = 1e-5
+	sigma_ra_gaia = 6e-5
+	sigma_dec_gaia = 6e-5
 	parallax = 0.1
 
 
@@ -130,38 +132,54 @@ def simulate_and_model_data(inc, roman_err):
 	[ra_orbit, ra_orbit_sum, ra_sim, ra_sim_sum],
 	[dec_orbit, dec_orbit_sum, dec_sim, dec_sim_sum]]  = times, rv_results, ra_results, dec_results
 
-
-	'''
-	sigma_ra_roman = roman_err
-	sigma_dec_roman = roman_err
+	ra_gaia_err = np.full(np.shape(ra_sim_sum), sigma_ra_gaia)
+	dec_gaia_err = np.full(np.shape(dec_sim_sum), sigma_dec_gaia)
 
 
+	#add roman observing times if roman_err not None
+	if roman_err is not None:
+		t_1 =  times_observed_astrometry_gaia[-1]+1800
+		times_observed_astrometry_roman = []
+		for ii in range(t_1, t_1+1800):
+			if ii % 90 == 0:
+				times_observed_astrometry_roman.append(ii)	
 
-	times, rv_results, ra_results, dec_results = simulate_data(
-		n_planets, 
-		sigma_rv, 
-		sigma_ra_roman,
-		sigma_dec_roman,
-		parallax,
-		orbit_params,
-		times_observed_rv = times_observed_rv,
-		times_observed_astrometry = times_observed_astrometry_roman
-		)
 
-	times_astrometry = np.append(times_astrometry, times[2], axis=0)
+		sigma_ra_roman = roman_err
+		sigma_dec_roman = roman_err
 
-	times_observed_astrometry = np.append(times_observed_astrometry, times[3], axis=0)
 
-	ra_orbit = np.append(ra_orbit, ra_results[0], axis=0)
-	ra_orbit_sum = np.append(ra_orbit_sum, ra_results[1], axis=0)
-	ra_sim = np.append(ra_sim, ra_results[2], axis=0)
-	ra_sim_sum = np.append(ra_sim_sum, ra_results[3], axis=0)
 
-	dec_orbit = np.append(dec_orbit, dec_results[0], axis=0)
-	dec_orbit_sum = np.append(dec_orbit_sum, dec_results[1], axis=0)
-	dec_sim = np.append(dec_sim, dec_results[2], axis=0)
-	dec_sim_sum = np.append(dec_sim_sum, dec_results[3], axis=0)
-	'''
+		times, rv_results, ra_results, dec_results = simulate_data(
+			n_planets, 
+			sigma_rv, 
+			sigma_ra_roman,
+			sigma_dec_roman,
+			parallax,
+			orbit_params,
+			times_observed_rv = times_observed_rv,
+			times_observed_astrometry = times_observed_astrometry_roman
+			)
+
+		times_astrometry = np.append(times_astrometry, times[2], axis=0)
+
+		times_observed_astrometry = np.append(times_observed_astrometry, times[3], axis=0)
+
+		ra_orbit = np.append(ra_orbit, ra_results[0], axis=0)
+		ra_orbit_sum = np.append(ra_orbit_sum, ra_results[1], axis=0)
+		ra_sim = np.append(ra_sim, ra_results[2], axis=0)
+		ra_sim_sum = np.append(ra_sim_sum, ra_results[3], axis=0)
+
+		dec_orbit = np.append(dec_orbit, dec_results[0], axis=0)
+		dec_orbit_sum = np.append(dec_orbit_sum, dec_results[1], axis=0)
+		dec_sim = np.append(dec_sim, dec_results[2], axis=0)
+		dec_sim_sum = np.append(dec_sim_sum, dec_results[3], axis=0)
+
+		ra_roman_err = np.full(np.shape(ra_results[3]), sigma_ra_roman)
+		dec_roman_err = np.full(np.shape(dec_results[3]), sigma_dec_roman)
+
+
+	
 	##################
 	##################
 	##################
@@ -195,9 +213,12 @@ def simulate_and_model_data(inc, roman_err):
 
 	x_astrometry = np.array(times_observed_astrometry)
 	ra_data = ra_sim_sum
-	ra_err = np.full(np.shape(ra_data), sigma_ra_gaia)
 	dec_data = dec_sim_sum
-	dec_err = np.full(np.shape(dec_data), sigma_ra_gaia)
+
+
+	if roman_err is not None:
+		ra_err = np.concatenate(ra_gaia_err, ra_roman_err)
+		dec_err = np.concatenate(dec_gaia_err, dec_roman_err)
 
 
 	# make a fine grid that spans the observation window for plotting purposes
@@ -284,7 +305,7 @@ def simulate_and_model_data(inc, roman_err):
 	################
 	#save trace and model
 	#with open('./traces/inc' + str(int(inc)) + '_gaia10_roman5_err' + str(int(1e6*roman_err)) + '.pkl', 'wb') as buff:
-	with open('./traces/inc' + str(int(inc)) + '_gaia10_roman0_errNA.pkl', 'wb') as buff:
+	with open('./traces/inc' + str(int(inc_earth)) + '_gaia10_roman0_errNA.pkl', 'wb') as buff:
 		pickle.dump({'model': joint_model, 'trace': trace}, buff)
 
 

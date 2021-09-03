@@ -220,6 +220,11 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err):
 		ra_err = np.concatenate(ra_gaia_err, ra_roman_err)
 		dec_err = np.concatenate(dec_gaia_err, dec_roman_err)
 
+	else:
+		ra_err = ra_gaia_err
+		dec_err = dec_gaia_err
+
+
 
 	# make a fine grid that spans the observation window for plotting purposes
 	t_astrometry = np.linspace(x_astrometry.min() - 5, x_astrometry.max() + 5, 1000)

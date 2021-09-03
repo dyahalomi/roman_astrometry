@@ -31,7 +31,7 @@ def minimize_rv(periods, Ks, x_rv, y_rv, y_rv_err):
 		logP = pm.Uniform(
 			"logP",
 			lower=0,
-			upper=10,
+			upper=11,
 			shape=2,
 			testval=np.log(periods),
 		)
@@ -46,7 +46,7 @@ def minimize_rv(periods, Ks, x_rv, y_rv, y_rv_err):
 		
 		
 		# Wide normal prior for semi-amplitude
-		logK = pm.Uniform("logK", lower=-4, upper=3, shape=2, testval=np.log(Ks))
+		logK = pm.Uniform("logK", lower=-4, upper=4, shape=2, testval=np.log(Ks))
 		
 		K = pm.Deterministic("K", tt.exp(logK))
 		

@@ -251,11 +251,11 @@ def minimize_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_e
 				
 				# uniform prior on sqrtm_sini and sqrtm_cosi (upper 100* testval to stop planet flipping)
 				sqrtm_sini = pm.Uniform(
-					"sqrtm_sini", lower=0, upper=100*np.sqrt(mass_test_vals)*np.sin(inc), 
+					"sqrtm_sini", lower=0, upper=10*np.sqrt(mass_test_vals)*np.sin(inc), 
 					testval = np.sqrt(mass_test_vals)*np.sin(inc), shape=2)
 				
 				sqrtm_cosi = pm.Uniform(
-					"sqrtm_cosi", lower=0, upper=100*np.sqrt(mass_test_vals)*np.cos(inc), 
+					"sqrtm_cosi", lower=0, upper=10*np.sqrt(mass_test_vals)*np.cos(inc), 
 					testval = np.sqrt(mass_test_vals)*np.cos(inc), shape=2)
 
 			

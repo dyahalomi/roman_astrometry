@@ -208,7 +208,7 @@ def minimize_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_e
 				# so we'll set a broad prior on logP
 				
 				logP = pm.Uniform(
-					"logP", lower=0, upper=2*np.log(P_RV), testval=np.log(P_RV), shape=2
+					"logP", lower=0, upper=np.log(2*P_RV), testval=np.log(P_RV), shape=2
 				)
 				P = pm.Deterministic("P", tt.exp(logP))
 				

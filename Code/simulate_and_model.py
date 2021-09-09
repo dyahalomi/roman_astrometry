@@ -111,7 +111,7 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err):
 
 	sigma_ra_gaia = 6e-5
 	sigma_dec_gaia = 6e-5
-	parallax = 0.1
+	parallax = 0.1 #as
 
 
 

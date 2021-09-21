@@ -311,11 +311,11 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 	#save trace and model
 	#with open('./traces/inc' + str(int(inc)) + '_gaia10_roman5_err' + str(int(1e6*roman_err)) + '.pkl', 'wb') as buff:
 	if roman_err is not None:
-		with open('./traces/Sep15/period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_roman' + str(int(1e6*roman_err)) + '.pkl', 'wb') as buff:
+		with open('./traces/Sep21/period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_roman' + str(int(1e6*roman_err)) + '.pkl', 'wb') as buff:
 			pickle.dump({'model': joint_model, 'trace': trace}, buff)
 
 	else:
-		with open('./traces/Sep15/period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_romanNA.pkl', 'wb') as buff:
+		with open('./traces/Sep21/period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_romanNA.pkl', 'wb') as buff:
 			pickle.dump({'model': joint_model, 'trace': trace}, buff)
 
 

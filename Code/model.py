@@ -183,7 +183,7 @@ def minimize_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_e
 	# for predicted orbits
 	t_fine = np.linspace(x_astrometry.min() - 500, x_astrometry.max() + 500, num=1000)
 
-	inc_test_vals = np.array(np.radians([10., 45., 80.]))
+	inc_test_vals = np.array(np.radians([5., 25., 45., 65., 85.]))
 	model, map_soln, logp = [], [], []
 	for inc in inc_test_vals:
 		print('')

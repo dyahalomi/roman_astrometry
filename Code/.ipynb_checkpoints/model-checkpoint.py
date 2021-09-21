@@ -42,7 +42,7 @@ def minimize_rv(periods, Ks, x_rv, y_rv, y_rv_err):
 
 
 		##  wide uniform prior on t_periastron
-		tperi = pm.Uniform("tperi", lower=x_rv.min(), upper=3*x_rv.max(), shape=2)
+		tperi = pm.Uniform("tperi", lower=0, upper=10000, shape=2)
 		
 		
 		# Wide normal prior for semi-amplitude
@@ -84,7 +84,8 @@ def minimize_rv(periods, Ks, x_rv, y_rv, y_rv_err):
 
 		# Finally add in the observation model. This next line adds a new contribution
 		# to the log probability of the PyMC3 model
-		err = tt.sqrt(y_rv_err ** 2 + tt.exp(2 * logs))
+		#err = tt.sqrt(y_rv_err ** 2 + tt.exp(2 * logs))
+		err = y_rv_err
 		pm.Normal("obs", mu=rv_model, sd=err, observed=y_rv)
 
 
@@ -321,14 +322,18 @@ def minimize_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_e
 				
 
 				# Add jitter terms to both separation and position angle
-				log_dec_s = pm.Normal(
-					"log_dec_s", mu=np.log(np.median(dec_err)), sd=dec_err
-				)
-				log_ra_s = pm.Normal(
-					"log_ra_s", mu=np.log(np.median(ra_err)), sd=ra_err
-				)
-				dec_tot_err = tt.sqrt(dec_err ** 2 + tt.exp(2 * log_dec_s))
-				ra_tot_err = tt.sqrt(ra_err ** 2 + tt.exp(2 * log_ra_s))
+				#log_dec_s = pm.Normal(
+				#	"log_dec_s", mu=np.log(np.median(dec_err)), sd=dec_err
+				#)
+				#log_ra_s = pm.Normal(
+				#	"log_ra_s", mu=np.log(np.median(ra_err)), sd=ra_err
+				#)
+
+				#dec_tot_err = tt.sqrt(dec_err ** 2 + tt.exp(2 * log_dec_s))
+				#ra_tot_err = tt.sqrt(ra_err ** 2 + tt.exp(2 * log_ra_s))
+				dec_tot_err = dec_err
+				ra_tot_err = ra_err
+
 
 				# define the likelihood function, e.g., a Gaussian on both ra and dec		
 				pm.Normal("dec_obs", mu=dec_model, sd=dec_tot_err, observed=dec_data)
@@ -339,7 +344,7 @@ def minimize_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_e
 				
 				# ADD RV MODEL
 				# Jitter & a quadratic RV trend
-				log_rv = pm.Normal("log_rv", mu=np.log(np.median(y_rv_err)), sd=y_rv_err)
+				#log_rv = pm.Normal("log_rv", mu=np.log(np.median(y_rv_err)), sd=y_rv_err)
 
 
 				# And a function for computing the full RV model
@@ -359,7 +364,9 @@ def minimize_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_e
 
 				# Finally add in the observation model. This next line adds a new contribution
 				# to the log probability of the PyMC3 model
-				rv_err = tt.sqrt(y_rv_err ** 2 + tt.exp(2 * log_rv))
+				#rv_err = tt.sqrt(y_rv_err ** 2 + tt.exp(2 * log_rv))
+				rv_err = y_rv_err
+
 				pm.Normal("obs_RV", mu=rv_model, sd=rv_err, observed=y_rv)
 
 				# Optimize to find the initial parameters
@@ -401,12 +408,14 @@ def model_both(model, map_soln, tune_steps, draw_steps):
 	print("------------")
 
 	print('m_planet: ' + str(map_soln['m_planet']))
+	print('P: ' + str(map_soln['P']))
 	print('incl: ' + str(map_soln['incl']))
 	print('Omega: ' + str(map_soln['Omega']))
 	print('tperi: ' + str(map_soln['tperi']))
-	print('P: ' + str(map_soln['P']))
 	print('ecc: ' + str(map_soln['ecc']))
 	print('omega: ' + str(map_soln['omega']))
+	print('plx: ' + str(map_soln['plx']))
+
 
 	with model:
 		trace = pmx.sample(

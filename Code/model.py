@@ -42,7 +42,7 @@ def minimize_rv(periods, Ks, x_rv, y_rv, y_rv_err):
 
 
 		##  wide uniform prior on t_periastron
-		tperi = pm.Uniform("tperi", lower=x_rv.min(), upper=3*x_rv.max(), shape=2)
+		tperi = pm.Uniform("tperi", lower=0, upper=10000, shape=2)
 		
 		
 		# Wide normal prior for semi-amplitude

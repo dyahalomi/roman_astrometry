@@ -23,6 +23,7 @@ def minimize_rv(periods, Ks, x_rv, y_rv, y_rv_err):
 	t_rv = np.linspace(x_rv.min() - 5, x_rv.max() + 5, 1000)
 	print("minimizing RV only model solutions pre-MCMC")
 	print("------------")
+	print("periods....", periods)
 
 	with pm.Model() as model:
 	
@@ -42,7 +43,7 @@ def minimize_rv(periods, Ks, x_rv, y_rv, y_rv_err):
 
 
 		##  wide uniform prior on t_periastron
-		tperi = pm.Uniform("tperi", lower=0, upper=periods, shape=2)
+		tperi = pm.Uniform("tperi", lower=0, upper=2*periods, shape=2)
 		
 		
 		# Wide normal prior for semi-amplitude
@@ -209,7 +210,7 @@ def minimize_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_e
 				# so we'll set a broad prior on logP
 				
 				logP = pm.Uniform(
-					"logP", lower=0, upper=np.log(P_RV), testval=np.log(P_RV), shape=2
+					"logP", lower=0, upper=np.log(2*P_RV), testval=np.log(P_RV), shape=2
 				)
 				P = pm.Deterministic("P", tt.exp(logP))
 				

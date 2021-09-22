@@ -55,7 +55,7 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 
 	P_earth = 300
 	e_earth = 0.0167
-	Tper_earth= 2454115.5208333 - T_subtract
+	Tper_earth= 100
 	omega_earth = np.radians(102.9)
 	Omega_earth = np.radians(0.0)
 	inclination_earth = np.radians(inc_earth)
@@ -65,7 +65,7 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 
 	P_jup = period_jup	
 	e_jup = 0.0484
-	Tper_jup = 2455633.7215278 - T_subtract
+	Tper_jup = 500
 	omega_jup = np.radians(274.3) - 2*np.pi
 	Omega_jup = np.radians(100.4)
 	inclination_jup = np.radians(1.31) + inclination_earth
@@ -336,30 +336,30 @@ for inc in incs_earth:
         for roman_err in roman_errs:
             for roman_duration in roman_durations:
                 for gaia_ob in gaia_obs:
-                    #print('start... inc: ' + str(int(inc)) + ', roman_err: ' + str(int(1e6*roman_err)))
-                    print('start')
-                    print('--------')
-                    print('Jupiter period: ' + str(int(period)))
-                    print('Earth inclination: ' + str(int(inc)))
+                	if __name__ == "__main__":
+	                    print('start')
+	                    print('--------')
+	                    print('Jupiter period: ' + str(int(period)))
+	                    print('Earth inclination: ' + str(int(inc)))
 
-                    if roman_err is not None:
-                        print('Roman precision: ' + str(int(1e6*roman_err)))
-                    else:
-                        print('Roman precision: N/A')
+	                    if roman_err is not None:
+	                        print('Roman precision: ' + str(int(1e6*roman_err)))
+	                    else:
+	                        print('Roman precision: N/A')
 
-                    if __name__ == "__main__":
-                    	simulate_and_model_data(inc, period, roman_err, roman_duration, gaia_ob)
-                    print('end')
-                    print('')
-                    print('')
-                    print('')
-                    print('')
-                    print('')
-                    print('')
-                    print('')
-                    print('')
-                    print('')
-                    print('')
+
+	                    simulate_and_model_data(inc, period, roman_err, roman_duration, gaia_ob)
+	                    print('end')
+	                    print('')
+	                    print('')
+	                    print('')
+	                    print('')
+	                    print('')
+	                    print('')
+	                    print('')
+	                    print('')
+	                    print('')
+	                    print('')
 
 
 

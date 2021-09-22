@@ -346,7 +346,9 @@ for inc in incs_earth:
                         print('Roman precision: ' + str(int(1e6*roman_err)))
                     else:
                         print('Roman precision: N/A')
-                    simulate_and_model_data(inc, period, roman_err, roman_duration, gaia_ob)
+
+                    if __name__ == "__main__":
+                    	simulate_and_model_data(inc, period, roman_err, roman_duration, gaia_ob)
                     print('end')
                     print('')
                     print('')

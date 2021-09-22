@@ -250,7 +250,7 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 
 
 	indices = power_cut1.argsort()[-1:][::-1]
-	period1 = np.array(period_cut1[indices][0])
+	period1 = period_cut1[indices][0]
 	print('LS period 1: ' + str(period1))
 
 	period1_min_cut = 500
@@ -271,7 +271,7 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 	################
 	################
 	#minimize on RV data
-	periods_guess = [period2, period1]
+	periods_guess = np.array([period2, period1])
 	Ks_guess = xo.estimate_semi_amplitude(periods_guess, x_rv, y_rv, y_rv_err)
 
 	rv_map_soln = minimize_rv(periods_guess, Ks_guess, x_rv, y_rv, y_rv_err)

@@ -311,7 +311,7 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 	#save trace and model
 	#with open('./traces/inc' + str(int(inc)) + '_gaia10_roman5_err' + str(int(1e6*roman_err)) + '.pkl', 'wb') as buff:
 	if roman_err is not None:
-		with open('./traces/Sep22/period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_roman' + str(int(1e6*roman_err)) + '.pkl', 'wb') as buff:
+		with open('./traces/Sep22/period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_roman' + str(int(1e6*roman_err)) + '_' + str(int(roman_duration)) + '.pkl', 'wb') as buff:
 			pickle.dump({'model': joint_model, 'trace': trace}, buff)
 
 	else:
@@ -325,9 +325,9 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 
 
 incs_earth = [45.] #, 10., 80.] #degrees
-periods_jup = [4327.631] #, 1000, 10000] #days
-roman_errs = [5e-6] #, 10e-6, 20e-6, None] #micro-as
-roman_durations = [10] #, 5] #years
+periods_jup = [4327] #, 1000, 10000] #days
+roman_errs = [20e-6, 10e-6, None, 5e-6] #micro-as
+roman_durations = [5, 10] #years
 gaia_obs = [200] #, 100] #number of observations with Gaia
 
 

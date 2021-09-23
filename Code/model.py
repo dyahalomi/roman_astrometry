@@ -42,7 +42,7 @@ def minimize_rv(periods, Ks, x_rv, y_rv, y_rv_err):
 
 
 		##  wide uniform prior on t_periastron
-		tperi = pm.Uniform("tperi", lower=0, upper=2*periods, shape=2)
+		tperi = pm.Uniform("tperi", lower=0, upper=periods, shape=2)
 		
 		
 		# Wide normal prior for semi-amplitude
@@ -55,6 +55,8 @@ def minimize_rv(periods, Ks, x_rv, y_rv, y_rv_err):
 		ecs = pmx.UnitDisk("ecs", shape=(2, 2), testval=0.01 * np.ones((2, 2)))
 		ecc = pm.Deterministic("ecc", tt.sum(ecs ** 2, axis=0))
 		omega = pm.Deterministic("omega", tt.arctan2(ecs[1], ecs[0]))
+
+		xo.eccentricity.kipping13("ecc_prior", fixed=True, observed=ecc)
 
 
 
@@ -219,6 +221,8 @@ def minimize_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_e
 													 np.sqrt(ecc_RV)*np.sin(omega_RV)]))
 				ecc = pm.Deterministic("ecc", tt.sum(ecs ** 2, axis=0))
 				omega = pm.Deterministic("omega", tt.arctan2(ecs[1], ecs[0]))
+
+				xo.eccentricity.kipping13("ecc_prior", fixed=True, observed=ecc)
 
 				
 				

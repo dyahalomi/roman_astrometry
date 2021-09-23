@@ -92,8 +92,8 @@ def minimize_rv(periods, Ks, x_rv, y_rv, y_rv_err):
 
 		map_soln = model.test_point
 		map_soln = pmx.optimize(start=map_soln, vars=[tperi])
-		map_soln = pmx.optimize(start=map_soln, vars=[P])
-		map_soln = pmx.optimize(start=map_soln, vars=[ecs])
+		#map_soln = pmx.optimize(start=map_soln, vars=[P])
+		#map_soln = pmx.optimize(start=map_soln, vars=[ecs])
 		map_soln = pmx.optimize(start=map_soln)
 
 
@@ -372,7 +372,7 @@ def minimize_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_e
 
 				# Optimize to find the initial parameters
 				map_soln = model.test_point
-				map_soln = pmx.optimize(map_soln, vars=[Omega, m_planet, incl, ecs, phase])
+				#map_soln = pmx.optimize(map_soln, vars=[Omega, m_planet, incl, ecs, phase])
 
 				map_soln = pmx.optimize(map_soln)
 

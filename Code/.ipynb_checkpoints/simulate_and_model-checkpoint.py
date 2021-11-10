@@ -27,7 +27,7 @@ matplotlib.rc('xtick', labelsize=18)
 matplotlib.rc('ytick', labelsize=18)
 
 
-def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration):
+def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, gaia_obs):
 
 	'''
 	inc_earth = Earth inclination in degrees (Jupiter assumed 1.31 degrees greater than this value)
@@ -53,19 +53,19 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration):
 	# orbital parameters from https://www.princeton.edu/~willman/planetary_systems/Sol/
 	# BJD determined by converting values above using https://ssd.jpl.nasa.gov/tc.cgi#top
 
-	P_earth = 365.256
+	P_earth = 300
 	e_earth = 0.0167
-	Tper_earth= 2454115.5208333 - T_subtract
+	Tper_earth= 100
 	omega_earth = np.radians(102.9)
 	Omega_earth = np.radians(0.0)
 	inclination_earth = np.radians(inc_earth)
-	m_earth = 1*3.00273e-6 #units m_sun
+	m_earth = 4.*3.00273e-6 #units m_sun
 
 
 
 	P_jup = period_jup	
 	e_jup = 0.0484
-	Tper_jup = 2455633.7215278 - T_subtract
+	Tper_jup = 500
 	omega_jup = np.radians(274.3) - 2*np.pi
 	Omega_jup = np.radians(100.4)
 	inclination_jup = np.radians(1.31) + inclination_earth
@@ -250,7 +250,7 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration):
 
 
 	indices = power_cut1.argsort()[-1:][::-1]
-	period1 = np.array(period_cut1[indices][0])
+	period1 = period_cut1[indices][0]
 	print('LS period 1: ' + str(period1))
 
 	period1_min_cut = 500
@@ -271,7 +271,7 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration):
 	################
 	################
 	#minimize on RV data
-	periods_guess = [period2, period1]
+	periods_guess = np.array([period2, period1])
 	Ks_guess = xo.estimate_semi_amplitude(periods_guess, x_rv, y_rv, y_rv_err)
 
 	rv_map_soln = minimize_rv(periods_guess, Ks_guess, x_rv, y_rv, y_rv_err)
@@ -291,7 +291,7 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration):
 	################
 	################
 	#run full MCMC
-	trace = model_both(joint_model, joint_map_soln, 1000, 1000)
+	trace = model_both(joint_model, joint_map_soln, 2000, 2000)
 
 
 	##################
@@ -311,15 +311,17 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration):
 	#save trace and model
 	#with open('./traces/inc' + str(int(inc)) + '_gaia10_roman5_err' + str(int(1e6*roman_err)) + '.pkl', 'wb') as buff:
 	if roman_err is not None:
-		with open('./traces/Sep7/period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_roman' + str(int(1e6*roman_err)) + '.pkl', 'wb') as buff:
+		with open('./traces/Nov10/4Me_period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_roman' + str(int(1e6*roman_err)) + '_' + str(int(roman_duration)) + '.pkl', 'wb') as buff:
 			pickle.dump({'model': joint_model, 'trace': trace}, buff)
 
 	else:
-		with open('./traces/period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_romanNA.pkl', 'wb') as buff:
+		with open('./traces/Nov9/4Me_period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_romanNA.pkl', 'wb') as buff:
 			pickle.dump({'model': joint_model, 'trace': trace}, buff)
 
 
 	return joint_model, trace
+
+
 
 
 

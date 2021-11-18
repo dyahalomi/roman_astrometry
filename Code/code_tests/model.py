@@ -260,9 +260,12 @@ def minimize_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_e
 				# uniform prior on sqrtm_sini and sqrtm_cosi (upper 100* testval to stop planet flipping)
 				log_m = pm.Uniform("log_m", lower=-1, upper=np.log(100*mass_test_vals), testval=np.log(mass_test_vals), shape=2)
 				m_planet = pm.Deterministic("m_planet", tt.exp(log_m))
-
-				incl = pm.Uniform("incl", lower=0, upper=np.pi/2, testval=inc)
 				m_planet_fit = pm.Deterministic("m_planet_fit", m_planet/m_sun)
+
+
+				cos_incl = pm.Uniform("cos_incl", lower=0, upper=1, testval=inc)
+				incl = pm.Deterministic("incl", tt.arccos(cos_incl))
+				
 
 
 				

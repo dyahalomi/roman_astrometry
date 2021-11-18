@@ -59,7 +59,7 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 	omega_earth = np.radians(102.9)
 	Omega_earth = np.radians(0.0)
 	inclination_earth = np.radians(inc_earth)
-	m_earth = 3.*3.00273e-6 #units m_sun
+	m_earth = 1.*3.00273e-6 #units m_sun
 
 
 
@@ -141,7 +141,7 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 		t_1 =  times_observed_astrometry_gaia[-1]+1800
 		times_observed_astrometry_roman = []
 		for ii in range(t_1, t_1+(roman_duration*365)):
-			if ii % 90 == 0:
+			if ii % 45 == 0:
 				times_observed_astrometry_roman.append(ii)	
 
 
@@ -311,11 +311,11 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 	#save trace and model
 	#with open('./traces/inc' + str(int(inc)) + '_gaia10_roman5_err' + str(int(1e6*roman_err)) + '.pkl', 'wb') as buff:
 	if roman_err is not None:
-		with open('./traces/Nov11/3Me_period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_roman' + str(int(1e6*roman_err)) + '_' + str(int(roman_duration)) + '.pkl', 'wb') as buff:
+		with open('./traces/Nov18/Me_period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_roman' + str(int(1e6*roman_err)) + '_' + str(int(roman_duration)) + '_2x.pkl', 'wb') as buff:
 			pickle.dump({'model': joint_model, 'trace': trace}, buff)
 
 	else:
-		with open('./traces/Nov11/3Me_period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_romanNA.pkl', 'wb') as buff:
+		with open('./traces/Nov18/Me_period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_romanNA.pkl', 'wb') as buff:
 			pickle.dump({'model': joint_model, 'trace': trace}, buff)
 
 

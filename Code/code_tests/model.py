@@ -263,7 +263,7 @@ def minimize_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_e
 				m_planet_fit = pm.Deterministic("m_planet_fit", m_planet/m_sun)
 
 
-				cos_incl = pm.Uniform("cos_incl", lower=0, upper=1, testval=np.cos(inc))
+				cos_incl = pm.Uniform("cos_incl", lower=0, upper=1, testval=np.cos(inc), shape=2)
 				incl = pm.Deterministic("incl", tt.arccos(cos_incl))
 				
 

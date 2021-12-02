@@ -7,7 +7,7 @@ incs_earth = [45.] #, 10., 80.] #degrees
 periods_jup = [4327] #, 1000, 10000] #days
 roman_errs = [5e-6, 10e-6, 20e-6, None] #micro-as
 roman_durations = [10, 5] #years
-gaia_obs = [200] #, 100] #number of observations with Gaia
+gaia_obs = [100] #, 100] #number of observations with Gaia
 
 
 for inc in incs_earth:

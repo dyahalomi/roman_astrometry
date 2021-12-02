@@ -53,13 +53,15 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 	# orbital parameters from https://www.princeton.edu/~willman/planetary_systems/Sol/
 	# BJD determined by converting values above using https://ssd.jpl.nasa.gov/tc.cgi#top
 
+	m_sun = 333030 #earth masses
+
 	P_earth = 300
 	e_earth = 0.0167
 	Tper_earth= 100
 	omega_earth = np.radians(102.9)
 	Omega_earth = np.radians(0.0)
 	inclination_earth = np.radians(inc_earth)
-	m_earth = 1.*3.00273e-6 #units m_sun
+	m_earth = 1./m_sun #units m_sun
 
 
 
@@ -69,10 +71,10 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 	omega_jup = np.radians(274.3) - 2*np.pi
 	Omega_jup = np.radians(100.4)
 	inclination_jup = np.radians(1.31) + inclination_earth
-	m_jup = 317.83*3.00273e-6 #units m_sun
+	m_jup = 317.83/m_sun #units m_sun
 
 
-	m_sun = 333030 #earth masses
+	 
 
 
 	#add gaia observing times
@@ -141,7 +143,7 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 		t_1 =  times_observed_astrometry_gaia[-1]+1800
 		times_observed_astrometry_roman = []
 		for ii in range(t_1, t_1+(roman_duration*365)):
-			if ii % 45 == 0:
+			if ii % 90 == 0:
 				times_observed_astrometry_roman.append(ii)	
 
 
@@ -225,6 +227,26 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 		dec_err = dec_gaia_err
 
 
+	#save simulated data as dataframe and export to csv
+	simulated_data_dic = {
+		"x_rv": x_rv,
+		"y_rv": y_rv,
+		"y_rv_err": y_rv_err,
+		"x_astrometry": x_astrometry,
+		"y_ra": ra_data,
+		"y_dec": dec_data,
+		"y_ra_err": ra_err,
+		"y_dec_err": dec_err,
+		}
+
+
+	simulated_data = pd.DataFrame.from_dict(simulated_data_dic, orient='index')
+	simulated_data = simulated_data.transpose()
+	print(simulated_data)
+
+
+	simulated_data.to_csv('simulated_data/Dec2/100gaia.csv')
+
 
 	# make a fine grid that spans the observation window for plotting purposes
 	t_astrometry = np.linspace(x_astrometry.min() - 5, x_astrometry.max() + 5, 1000)
@@ -271,7 +293,15 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 	################
 	################
 	#minimize on RV data
-	periods_guess = np.array([period2, period1])
+	
+	#if you want to use lombs scargle period estimate then uncomment line below
+	#periods_guess = np.array([period2, period1])
+
+	#if you want to use lombs scargle period estimate then comment line below
+	periods_guess = np.array([300, period_jup])
+	print("using actual period values as starting point for RV model")
+
+
 	Ks_guess = xo.estimate_semi_amplitude(periods_guess, x_rv, y_rv, y_rv_err)
 
 	rv_map_soln = minimize_rv(periods_guess, Ks_guess, x_rv, y_rv, y_rv_err)
@@ -291,7 +321,7 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 	################
 	################
 	#run full MCMC
-	trace = model_both(joint_model, joint_map_soln, 2000, 2000)
+	trace = model_both(joint_model, joint_map_soln, 1000, 1000)
 
 
 	##################
@@ -311,11 +341,11 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 	#save trace and model
 	#with open('./traces/inc' + str(int(inc)) + '_gaia10_roman5_err' + str(int(1e6*roman_err)) + '.pkl', 'wb') as buff:
 	if roman_err is not None:
-		with open('./traces/Nov18/blah_Me_period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_roman' + str(int(1e6*roman_err)) + '_' + str(int(roman_duration)) + '_2x.pkl', 'wb') as buff:
+		with open('./traces/Dec2/100gaia/period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_roman' + str(int(1e6*roman_err)) + '_' + str(int(roman_duration)) + '.pkl', 'wb') as buff:
 			pickle.dump({'model': joint_model, 'trace': trace}, buff)
 
 	else:
-		with open('./traces/Nov18/blah_Me_period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_romanNA.pkl', 'wb') as buff:
+		with open('./traces/Dec2/100gaia/period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_romanNA.pkl', 'wb') as buff:
 			pickle.dump({'model': joint_model, 'trace': trace}, buff)
 
 

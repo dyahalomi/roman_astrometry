@@ -272,8 +272,8 @@ def simulate_data(
 
     
     if n_planets > 1:
-        rv_sim = rv_observed
-        rv_sim_sum = np.sum(rv_observed, axis = 1) + np.random.normal(0, sigma_rv, len(rv_observed))
+        rv_sim = rv_observed + np.random.normal(0, sigma_rv, (len(rv_observed), n_planets))
+        rv_sim_sum = np.sum(rv_sim, axis = 1)
     else:
         rv_sim = rv_observed + np.random.normal(0, sigma_rv, len(rv_observed))
         rv_sim_sum = rv_sim
@@ -283,8 +283,8 @@ def simulate_data(
 
 
     if n_planets > 1:
-        ra_sim = ra_observed 
-        ra_sim_sum = np.sum(ra_sim, axis = 1) + np.random.normal(0, sigma_ra, len(ra_observed))
+        ra_sim = ra_observed + np.random.normal(0, sigma_ra, (len(ra_observed), n_planets))
+        ra_sim_sum = np.sum(ra_sim, axis = 1)
     
     else:
         ra_sim = ra_observed + np.random.normal(0, sigma_ra, len(ra_observed))
@@ -293,8 +293,8 @@ def simulate_data(
     
     
     if n_planets > 1:
-        dec_sim = dec_observed 
-        dec_sim_sum = np.sum(dec_sim, axis = 1) + np.random.normal(0, sigma_dec, len(dec_observed))
+        dec_sim = dec_observed + np.random.normal(0, sigma_dec, (len(dec_observed), n_planets)) 
+        dec_sim_sum = np.sum(dec_sim, axis = 1)
         
     else:
         dec_sim = dec_observed + np.random.normal(0, sigma_dec, len(dec_observed))

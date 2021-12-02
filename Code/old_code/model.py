@@ -188,13 +188,10 @@ def minimize_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_e
 	inc_test_vals = np.array(np.radians([5., 25., 45., 65., 85.]))
 	model, map_soln, logp = [], [], []
 	for inc in inc_test_vals:
-		mass_test_vals = min_masses_RV/np.sin(inc)
 		print('')
 		print("trying inclination = " + str(np.degrees(inc)))
-		print("mass test val = " + str(mass_test_vals))
 		print("------------")
-		
-		
+		mass_test_vals = min_masses_RV/np.sin(inc)
 
 
 
@@ -258,16 +255,19 @@ def minimize_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_e
 
 				
 				# uniform prior on sqrtm_sini and sqrtm_cosi (upper 100* testval to stop planet flipping)
-				log_m = pm.Uniform("log_m", lower=-1, upper=np.log(100*mass_test_vals), testval=np.log(mass_test_vals), shape=2)
-				m_planet = pm.Deterministic("m_planet", tt.exp(log_m))
+				sqrtm_sini = pm.Uniform(
+					"sqrtm_sini", lower=0, upper=10*np.sqrt(mass_test_vals)*np.sin(inc), 
+					testval = np.sqrt(mass_test_vals)*np.sin(inc), shape=2)
+				
+				sqrtm_cosi = pm.Uniform(
+					"sqrtm_cosi", lower=0, upper=10*np.sqrt(mass_test_vals)*np.cos(inc), 
+					testval = np.sqrt(mass_test_vals)*np.cos(inc), shape=2)
+
+			
+				m_planet = pm.Deterministic("m_planet", sqrtm_sini**2. + sqrtm_cosi**2.)
 				m_planet_fit = pm.Deterministic("m_planet_fit", m_planet/m_sun)
 
-
-				cos_incl = pm.Uniform("cos_incl", lower=0, upper=1, testval=np.cos(inc), shape=2)
-				incl = pm.Deterministic("incl", tt.arccos(cos_incl))
-				
-
-
+				incl = pm.Deterministic("incl", tt.arctan2(sqrtm_sini, sqrtm_cosi))
 				
 				# add keplers 3 law function
 				a = pm.Deterministic("a", a_from_Kepler3(P, 1.0+m_planet_fit))

@@ -251,14 +251,15 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 			'_inc' + str(int(inc_earth)) + 
 			'_gaia60_roman' + 
 			str(int(1e6*roman_err)) + '_' + 
-			str(int(roman_duration)) + 
-			'_100gaia.csv')
+			str(int(roman_duration)) + '_' +
+			str(int(gaia_obs)) + 'gaia.csv')
 
 	else:
 		simulated_data.to_csv('simulated_data/Dec14/period' + 
 			str(int(period_jup)) + 
 			'_inc' + str(int(inc_earth)) + 
-			'_gaia60_romanNA_100gaia.csv')
+			'_gaia60_romanNA_' + 
+			str(int(gaia_obs)) + 'gaia.csv')
 		
 	# make a fine grid that spans the observation window for plotting purposes
 	t_astrometry = np.linspace(x_astrometry.min() - 5, x_astrometry.max() + 5, 1000)
@@ -357,8 +358,8 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 			'_inc' + str(int(inc_earth)) + 
 			'_gaia60_roman' + 
 			str(int(1e6*roman_err)) + '_' +
-			str(int(roman_duration)) + 
-			'_100gaia.cdf')
+			str(int(roman_duration)) + '_' +
+			str(int(gaia_obs)) + 'gaia.cdf')
 		#with open('./traces/Dec2/period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_roman' + str(int(1e6*roman_err)) + '_' + str(int(roman_duration)) + '100gaia.pkl', 'wb') as buff:
 		#	pickle.dump({'model': joint_model, 'trace': trace}, buff)
 
@@ -366,7 +367,8 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 		trace.to_netcdf('./traces/Dec2/period' + 
 			str(int(period_jup)) + 
 			'_inc' + str(int(inc_earth)) + 
-			'_gaia60_romanNA_100gaia.cdf')
+			'_gaia60_romanNA_' + 
+			str(int(gaia_obs)) + 'gaia.cdf')
 		#with open('./traces/Dec2/100gaia/period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_romanNA_100gaia.pkl', 'wb') as buff:
 		#	pickle.dump({'model': joint_model, 'trace': trace}, buff)
 

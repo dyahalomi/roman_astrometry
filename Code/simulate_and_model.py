@@ -245,9 +245,21 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 	print(simulated_data)
 
 
-	simulated_data.to_csv('simulated_data/Dec2/100gaia.csv')
+	if roman_err is not None:
+		simulated_data.to_csv('simulated_data/Dec14/period' + 
+			str(int(period_jup)) + 
+			'_inc' + str(int(inc_earth)) + 
+			'_gaia60_roman' + 
+			str(int(1e6*roman_err)) + '_' + 
+			str(int(roman_duration)) + 
+			'_100gaia.csv')
 
-
+	else:
+		simulated_data.to_csv('simulated_data/Dec14/period' + 
+			str(int(period_jup)) + 
+			'_inc' + str(int(inc_earth)) + 
+			'_gaia60_romanNA_100gaia.csv')
+		
 	# make a fine grid that spans the observation window for plotting purposes
 	t_astrometry = np.linspace(x_astrometry.min() - 5, x_astrometry.max() + 5, 1000)
 	t_rv = np.linspace(x_rv.min() - 5, x_rv.max() + 5, 1000)
@@ -339,14 +351,24 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 	################
 	################
 	#save trace and model
-	#with open('./traces/inc' + str(int(inc)) + '_gaia10_roman5_err' + str(int(1e6*roman_err)) + '.pkl', 'wb') as buff:
 	if roman_err is not None:
-		with open('./traces/Dec2/100gaia/period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_roman' + str(int(1e6*roman_err)) + '_' + str(int(roman_duration)) + '.pkl', 'wb') as buff:
-			pickle.dump({'model': joint_model, 'trace': trace}, buff)
+		trace.to_netcdf('./traces/Dec2/period' + 
+			str(int(period_jup)) + 
+			'_inc' + str(int(inc_earth)) + 
+			'_gaia60_roman' + 
+			str(int(1e6*roman_err)) + '_' +
+			str(int(roman_duration)) + 
+			'_100gaia.cdf')
+		#with open('./traces/Dec2/period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_roman' + str(int(1e6*roman_err)) + '_' + str(int(roman_duration)) + '100gaia.pkl', 'wb') as buff:
+		#	pickle.dump({'model': joint_model, 'trace': trace}, buff)
 
 	else:
-		with open('./traces/Dec2/100gaia/period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_romanNA.pkl', 'wb') as buff:
-			pickle.dump({'model': joint_model, 'trace': trace}, buff)
+		trace.to_netcdf('./traces/Dec2/period' + 
+			str(int(period_jup)) + 
+			'_inc' + str(int(inc_earth)) + 
+			'_gaia60_romanNA_100gaia.cdf')
+		#with open('./traces/Dec2/100gaia/period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_romanNA_100gaia.pkl', 'wb') as buff:
+		#	pickle.dump({'model': joint_model, 'trace': trace}, buff)
 
 
 	return joint_model, trace

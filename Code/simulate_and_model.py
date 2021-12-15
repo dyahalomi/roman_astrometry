@@ -242,7 +242,6 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 
 	simulated_data = pd.DataFrame.from_dict(simulated_data_dic, orient='index')
 	simulated_data = simulated_data.transpose()
-	print(simulated_data)
 
 
 	if roman_err is not None:
@@ -353,22 +352,24 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 	################
 	#save trace and model
 	if roman_err is not None:
-		trace.to_netcdf('./traces/Dec2/period' + 
+		trace.posterior.to_netcdf('./traces/Dec14/period' + 
 			str(int(period_jup)) + 
 			'_inc' + str(int(inc_earth)) + 
 			'_gaia60_roman' + 
 			str(int(1e6*roman_err)) + '_' +
 			str(int(roman_duration)) + '_' +
-			str(int(gaia_obs)) + 'gaia.cdf')
+			str(int(gaia_obs)) + 'gaia.cdf',
+			group='posterior')
 		#with open('./traces/Dec2/period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_roman' + str(int(1e6*roman_err)) + '_' + str(int(roman_duration)) + '100gaia.pkl', 'wb') as buff:
 		#	pickle.dump({'model': joint_model, 'trace': trace}, buff)
 
 	else:
-		trace.to_netcdf('./traces/Dec2/period' + 
+		trace.posterior.to_netcdf('./traces/Dec14/period' + 
 			str(int(period_jup)) + 
 			'_inc' + str(int(inc_earth)) + 
 			'_gaia60_romanNA_' + 
-			str(int(gaia_obs)) + 'gaia.cdf')
+			str(int(gaia_obs)) + 'gaia.cdf',
+			group='posterior')
 		#with open('./traces/Dec2/100gaia/period' + str(int(period_jup)) + '_inc' + str(int(inc_earth)) + '_gaia60_romanNA_100gaia.pkl', 'wb') as buff:
 		#	pickle.dump({'model': joint_model, 'trace': trace}, buff)
 

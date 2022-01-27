@@ -33,13 +33,14 @@ def minimize_rv(periods, Ks, x_rv, y_rv, y_rv_err):
 			lower=0,
 			upper=11,
 			shape=2,
-			testval=np.log(periods),
-		)
+			testval=np.log(periods)
+			)
 		
 
 
 		P = pm.Deterministic("P", tt.exp(logP))
-
+		#P = pm.Deterministic("P", [300., 4327.])
+		#P = np.array([300., 4327])
 
 		##  wide uniform prior on t_periastron
 		tperi = pm.Uniform("tperi", lower=0, upper=periods, shape=2)
@@ -154,6 +155,7 @@ def minimize_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_e
 	m_sun = 333030 #earth masses
 	
 	P_RV = np.array(rv_map_soln['P'])
+	#P_RV = np.array([300., 4327.])
 	K_RV = np.array(rv_map_soln['K'])
 	tperi_RV = np.array(rv_map_soln['tperi'])
 	ecc_RV = np.array(rv_map_soln['ecc'])
@@ -213,11 +215,14 @@ def minimize_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_e
 				# We expect the period to be around that found from just the RVs,
 				# so we'll set a broad prior on logP
 				
-				logP = pm.Uniform(
-					"logP", lower=0, upper=np.log(2*P_RV), testval=np.log(P_RV), shape=2
-				)
-				P = pm.Deterministic("P", tt.exp(logP))
-				
+				#logP = pm.Uniform(
+				#	"logP", lower=0, upper=np.log(2*P_RV), testval=np.log(P_RV), shape=2
+				#)
+				#P = pm.Deterministic("P", tt.exp(logP))
+				#P = pm.Deterministic("P", [300., 4327.])
+				P = np.array([300., 4327.])
+
+
 				# Eccentricity & argument of periasteron
 				ecs = pmx.UnitDisk("ecs", shape=(2, 2), 
 								   testval=np.array([np.sqrt(ecc_RV)*np.cos(omega_RV), 
@@ -268,9 +273,13 @@ def minimize_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_e
 				
 
 
-				
+				m_true = [1., 317.83]
+				m_true_fit = [1./m_sun, 317.83/m_sun]
+
 				# add keplers 3 law function
-				a = pm.Deterministic("a", a_from_Kepler3(P, 1.0+m_planet_fit))
+				#a = pm.Deterministic("a", a_from_Kepler3(P, 1.0+m_true_fit))
+				
+				
 				
 				# Set up the orbit
 				orbit = xo.orbits.KeplerianOrbit(
@@ -280,10 +289,9 @@ def minimize_both(rv_map_soln, x_rv, y_rv, y_rv_err, x_astrometry, ra_data, ra_e
 					ecc=ecc,
 					omega=omega,
 					Omega=Omega,
-					m_planet = m_planet_fit,
+					m_planet = m_true_fit,
 					plx=plx
 				)
-
 
 				
 				
@@ -412,7 +420,11 @@ def model_both(model, map_soln, tune_steps, draw_steps):
 	print('Joint RV + Astometry Minimization Solutions:')
 	print("------------")
 
-	print('m_planet: ' + str(map_soln['m_planet']))
+        m_true = [1., 317.83]
+        m_true_fit = [1./m_sun, 317.83/m_sun]
+
+	#print('m_planet: ' + str(map_soln['m_planet']))
+	print('m_planet:' + str(m_true))
 	print('P: ' + str(map_soln['P']))
 	print('incl: ' + str(map_soln['incl']))
 	print('Omega: ' + str(map_soln['Omega']))

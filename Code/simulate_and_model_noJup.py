@@ -61,7 +61,7 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 	omega_earth = np.radians(102.9)
 	Omega_earth = np.radians(0.0)
 	inclination_earth = np.radians(inc_earth)
-	m_earth = .0000001/m_sun #units m_sun
+	m_earth = 1./m_sun #units m_sun
 
 
 
@@ -71,7 +71,7 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 	omega_jup = np.radians(274.3) - 2*np.pi
 	Omega_jup = np.radians(100.4)
 	inclination_jup = np.radians(1.31) + inclination_earth
-	m_jup = 317.83/m_sun #units m_sun
+	m_jup = 0.000000001/m_sun #units m_sun
 
 
 	 
@@ -88,7 +88,9 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 			
 	#add THE observing times
 	times_observed_rv = []
-	t_0 = int(Tper_earth)
+
+	#THE is ~10 years after Gaia
+	t_0 = int(Tper_earth+3650)
 	add_data = True
 	for ii in range(t_0, t_0+3600):
 		

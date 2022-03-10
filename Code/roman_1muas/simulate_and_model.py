@@ -108,12 +108,11 @@ def simulate_and_model_data(inc_earth, period_jup, roman_err, roman_duration, ga
 			times_observed_rv.append(ii)
 			
 
+	orbit_params_earth = [P_earth, e_earth, Tper_earth, omega_earth, Omega_earth, inclination_earth, m_earth]
 	orbit_params_jup = [P_jup, e_jup, Tper_jup, omega_jup, Omega_jup, inclination_jup, m_jup]
-	orbit_params_saturn = [P_saturn, e_saturn, Tper_saturn, omega_saturn, Omega_saturn, inclination_saturn, m_saturn]
-	
 
 	n_planets = 2
-	orbit_params = [orbit_params_jup, orbit_params_saturn]
+	orbit_params = [orbit_params_earth, orbit_params_jup]
 
 
 	sigma_rv = 0.3
